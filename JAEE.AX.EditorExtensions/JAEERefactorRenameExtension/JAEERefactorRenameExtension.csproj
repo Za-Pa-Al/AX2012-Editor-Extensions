@@ -3,35 +3,19 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{51E07EDC-927B-48F0-8EAE-D8E7156001AB}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>JAEE.AX.EditorExtensions</RootNamespace>
-    <AssemblyName>JAEE.AX.EditorExtensions.Outlining</AssemblyName>
+    <RootNamespace>JAEE.AX.EditorExtensions.RefactorRename</RootNamespace>
+    <AssemblyName>JAEE.AX.EditorExtensions.RefactorRename</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net48" Version="1.0.3" />
   </ItemGroup>
+
+  <!-- VS Text editor DLLs — not copied to output (live in EditorComponents at runtime) -->
   <ItemGroup>
     <Reference Include="Microsoft.VisualStudio.CoreUtility">
       <HintPath>..\..\References\EditorComponents\Microsoft.VisualStudio.CoreUtility.dll</HintPath>
@@ -57,30 +41,25 @@
       <HintPath>..\..\References\Microsoft.VisualStudio.Text.Internal.dll</HintPath>
       <Private>False</Private>
     </Reference>
+  </ItemGroup>
+
+  <!-- MEF + WPF framework references -->
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.ComponentModel.Composition" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Xaml" />
     <Reference Include="WindowsBase" />
+    <Reference Include="System.Xaml" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="OutliningTagger.cs" />
-    <Compile Include="OutliningTaggerProvider.cs" />
-    <Compile Include="PartialRegion.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Region.cs" />
+    <Compile Include="RefactorRenameKeyProcessorProvider.cs" />
+    <Compile Include="RefactorRenameKeyProcessor.cs" />
+    <Compile Include="RenameDialog.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\JAEEEditorExtensionSettings\JAEEEditorExtensionSettings.csproj">
-      <Project>{19E6C471-3218-454F-9990-98AF4C44B4FD}</Project>
-      <Name>JAEEEditorExtensionSettings</Name>
-    </ProjectReference>
-  </ItemGroup>
+
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -286,3 +286,8 @@ __pycache__/
 *.btm.cs
 *.odx.cs
 *.xsd.cs
+
+# Microsoft Visual Studio editor assemblies referenced via HintPath.
+# These are Microsoft redistributables (not part of this MIT project) and must NOT be
+# committed. Obtain them locally from the AX2012 client Bin — see References/README.md.
+References/**/*.dll

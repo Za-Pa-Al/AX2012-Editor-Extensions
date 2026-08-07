@@ -1,0 +1,6 @@
+<Project>
+  <Target Name="CopyToPublish" AfterTargets="Build">
+    <MakeDir Directories="$(MSBuildThisFileDirectory)publish" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(MSBuildThisFileDirectory)publish" />
+  </Target>
+</Project>

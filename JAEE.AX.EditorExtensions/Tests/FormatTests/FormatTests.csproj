@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>FormatTests</AssemblyName>
+    <RootNamespace>JAEE.AX.EditorExtensions.Format.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <!-- Link the VS-independent formatter core (compiled here as its own assembly so the
+       internal types are visible to the tests). The MEF files are NOT linked — they need
+       the Visual Studio editor assemblies. -->
+  <ItemGroup>
+    <Compile Include="..\..\JAEEFormatExtension\Token.cs" Link="core\Token.cs" />
+    <Compile Include="..\..\JAEEFormatExtension\XppLexer.cs" Link="core\XppLexer.cs" />
+    <Compile Include="..\..\JAEEFormatExtension\XppFormatter.cs" Link="core\XppFormatter.cs" />
+    <Compile Include="..\..\JAEEFormatExtension\FormatException.cs" Link="core\FormatException.cs" />
+  </ItemGroup>
+
+</Project>

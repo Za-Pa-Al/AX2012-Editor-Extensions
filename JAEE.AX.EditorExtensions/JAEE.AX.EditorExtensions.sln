@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JAEEEditorExtensionSettings
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JAEECurrentLineHighlight", "JAEECurrentLineHighlight\JAEECurrentLineHighlight.csproj", "{176F53A8-E0D3-4E3B-B7FA-D3C34C3C4935}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JAEEFormatExtension", "JAEEFormatExtension\JAEEFormatExtension.csproj", "{E0ECF600-F1A1-4E4E-9D12-07F73AB522E2}"
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
 		SccNumberOfProjects = 7
@@ -112,6 +114,16 @@ Global
 		{176F53A8-E0D3-4E3B-B7FA-D3C34C3C4935}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{176F53A8-E0D3-4E3B-B7FA-D3C34C3C4935}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{176F53A8-E0D3-4E3B-B7FA-D3C34C3C4935}.Release|x86.ActiveCfg = Release|Any CPU
+		{E0ECF600-F1A1-4E4E-9D12-07F73AB522E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0ECF600-F1A1-4E4E-9D12-07F73AB522E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0ECF600-F1A1-4E4E-9D12-07F73AB522E2}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{E0ECF600-F1A1-4E4E-9D12-07F73AB522E2}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{E0ECF600-F1A1-4E4E-9D12-07F73AB522E2}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E0ECF600-F1A1-4E4E-9D12-07F73AB522E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0ECF600-F1A1-4E4E-9D12-07F73AB522E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E0ECF600-F1A1-4E4E-9D12-07F73AB522E2}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{E0ECF600-F1A1-4E4E-9D12-07F73AB522E2}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{E0ECF600-F1A1-4E4E-9D12-07F73AB522E2}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

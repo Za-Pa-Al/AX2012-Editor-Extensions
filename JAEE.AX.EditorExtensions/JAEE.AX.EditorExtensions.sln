@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JAEEHighlightWordExtension", "JAEEHighlightWordExtension\JAEEHighlightWordExtension.csproj", "{0833A7EC-D6CC-470D-8E8D-E2BF85736CFB}"
@@ -94,16 +94,16 @@ Global
 		{19E6C471-3218-454F-9990-98AF4C44B4FD}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{19E6C471-3218-454F-9990-98AF4C44B4FD}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{19E6C471-3218-454F-9990-98AF4C44B4FD}.Release|x86.ActiveCfg = Release|Any CPU
-		{F49DC64C-83CE-4A68-8261-09007D83D410}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{F49DC64C-83CE-4A68-8261-09007D83D410}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{F49DC64C-83CE-4A68-8261-09007D83D410}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{F49DC64C-83CE-4A68-8261-09007D83D410}.Debug|x86.ActiveCfg = Debug|x86
-		{F49DC64C-83CE-4A68-8261-09007D83D410}.Debug|x86.Build.0 = Debug|x86
-		{F49DC64C-83CE-4A68-8261-09007D83D410}.Release|Any CPU.ActiveCfg = Release|x86
-		{F49DC64C-83CE-4A68-8261-09007D83D410}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{F49DC64C-83CE-4A68-8261-09007D83D410}.Release|Mixed Platforms.Build.0 = Release|x86
-		{F49DC64C-83CE-4A68-8261-09007D83D410}.Release|x86.ActiveCfg = Release|x86
-		{F49DC64C-83CE-4A68-8261-09007D83D410}.Release|x86.Build.0 = Release|x86
+		{F49DC64C-83CE-4A68-8261-09007D83D410}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F49DC64C-83CE-4A68-8261-09007D83D410}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F49DC64C-83CE-4A68-8261-09007D83D410}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{F49DC64C-83CE-4A68-8261-09007D83D410}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{F49DC64C-83CE-4A68-8261-09007D83D410}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F49DC64C-83CE-4A68-8261-09007D83D410}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F49DC64C-83CE-4A68-8261-09007D83D410}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F49DC64C-83CE-4A68-8261-09007D83D410}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{F49DC64C-83CE-4A68-8261-09007D83D410}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{F49DC64C-83CE-4A68-8261-09007D83D410}.Release|x86.ActiveCfg = Release|Any CPU
 		{176F53A8-E0D3-4E3B-B7FA-D3C34C3C4935}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{176F53A8-E0D3-4E3B-B7FA-D3C34C3C4935}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{176F53A8-E0D3-4E3B-B7FA-D3C34C3C4935}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU

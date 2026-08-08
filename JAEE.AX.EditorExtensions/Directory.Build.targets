@@ -1,6 +1,20 @@
 <Project>
-  <Target Name="CopyToPublish" AfterTargets="Build">
+
+  <!-- Share a single AssemblyVersion/AssemblyFileVersion (SharedAssemblyInfo.cs) across
+       every classic (non-SDK) extension project. Skipped for SDK-style projects such as
+       Tests\FormatTests, which generate their own assembly info and would otherwise get a
+       duplicate-attribute error. Bump the version in SharedAssemblyInfo.cs — one place. -->
+  <ItemGroup Condition="'$(UsingMicrosoftNETSdk)' != 'true'">
+    <Compile Include="$(MSBuildThisFileDirectory)SharedAssemblyInfo.cs">
+      <Link>Properties\SharedAssemblyInfo.cs</Link>
+    </Compile>
+  </ItemGroup>
+
+  <!-- Copy each extension's primary output into publish\ after it builds (classic projects
+       only, so the net8 test harness output is not published). -->
+  <Target Name="CopyToPublish" AfterTargets="Build" Condition="'$(UsingMicrosoftNETSdk)' != 'true'">
     <MakeDir Directories="$(MSBuildThisFileDirectory)publish" />
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(MSBuildThisFileDirectory)publish" />
   </Target>
+
 </Project>

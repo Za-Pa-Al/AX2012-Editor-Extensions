@@ -265,7 +265,7 @@ namespace JAEE.AX.EditorExtensions.Format
             private Token _prev;
             private readonly Stack<bool> _controlParen = new Stack<bool>();
             private readonly Stack<bool> _wrapParen = new Stack<bool>(); // is this paren a multiline arg list
-            private int _wrapDepth;   // number of enclosing multiline arg lists
+            private readonly Stack<int> _argCol = new Stack<int>();      // content column of each multiline arg list
 
             // switch/case: one entry per open brace. _switchBrace[i] = that block is a
             // switch body; _caseActive[i] = we are past a case/default label in it, so its
@@ -457,8 +457,10 @@ namespace JAEE.AX.EditorExtensions.Format
                 Attach(",");
                 if (t.BreakAfter)
                 {
+                    // align the next argument under the opening '(' (aligned-argument style)
                     _sb.Append('\n');
-                    _sb.Append(Indent(IndentLevel() + _wrapDepth));
+                    int col = _argCol.Count > 0 ? _argCol.Peek() : Indent(IndentLevel() + 1).Length;
+                    _sb.Append(new string(' ', col));
                     _lineStart = true;
                 }
                 else
@@ -466,6 +468,15 @@ namespace JAEE.AX.EditorExtensions.Format
                     _sb.Append(' ');
                     _lineStart = false;
                 }
+            }
+
+            // number of characters on the current (unfinished) line
+            private int CurrentColumn()
+            {
+                int nl = -1;
+                for (int i = _sb.Length - 1; i >= 0; i--)
+                    if (_sb[i] == '\n') { nl = i; break; }
+                return _sb.Length - (nl + 1);
             }
 
             private void EmitOpenParen(Token t, bool suppress)
@@ -490,12 +501,12 @@ namespace JAEE.AX.EditorExtensions.Format
                 _paren++;
                 _controlParen.Push(control); // only true control keywords drive braceless bodies
                 _wrapParen.Push(t.GroupMultiline);
-                if (t.GroupMultiline) _wrapDepth++;
+                if (t.GroupMultiline) _argCol.Push(CurrentColumn()); // column just after '('
             }
 
             private void EmitCloseParen(Token next)
             {
-                if (_wrapParen.Count > 0 && _wrapParen.Pop()) _wrapDepth = Math.Max(0, _wrapDepth - 1);
+                if (_wrapParen.Count > 0 && _wrapParen.Pop()) { if (_argCol.Count > 0) _argCol.Pop(); }
                 Attach(")");
                 _paren = Math.Max(0, _paren - 1);
                 bool wasControl = _controlParen.Count > 0 && _controlParen.Pop();

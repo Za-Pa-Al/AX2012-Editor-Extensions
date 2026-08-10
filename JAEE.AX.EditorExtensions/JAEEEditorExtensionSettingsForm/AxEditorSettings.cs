@@ -94,6 +94,24 @@ namespace JAEE.AX.EditorExtensions
             this.Close();
         }
 
+        // Repopulates every tab with fresh default values. Nothing is persisted until
+        // the user clicks OK (Cancel discards the reset).
+        private void btnDefaults_Click(object sender, EventArgs e)
+        {
+            this.propHighlightWord.SelectedObject = new HighlightWordProperties(new JAEEHighlightWordSettings());
+            this.propHighlightLine.SelectedObject = new HighlightLineProperties(new JAEECurrentLineHighlightSettings());
+            this.propSyntaxHighlighter.SelectedObject = new SyntaxHighlighterProperties(new JAEESyntaxHighlighterSettings());
+
+            decimal rows = new JAEEOutliningSettings().MaxRowsInTooltip;
+            if (rows < this.nRows.Minimum) rows = this.nRows.Minimum;
+            if (rows > this.nRows.Maximum) rows = this.nRows.Maximum;
+            this.nRows.Value = rows;
+
+            this.propHighlightWord.Refresh();
+            this.propHighlightLine.Refresh();
+            this.propSyntaxHighlighter.Refresh();
+        }
+
         #endregion
 
     }

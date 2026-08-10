@@ -64,9 +64,9 @@ namespace JAEE.AX.EditorExtensions
             MethodGlobalColor = Color.FromArgb(0x1F, 0x6F, 0xC0); // blue (global functions)
 
             ParameterEnabled = true;
-            ParameterColor = Color.FromArgb(0x66, 0x66, 0x66); // dark gray
+            ParameterColor = Color.FromArgb(0x40, 0x40, 0x40); // dark gray 64;64;64
             LocalEnabled = true;
-            LocalColor = Color.FromArgb(0x66, 0x66, 0x66);     // dark gray
+            LocalColor = Color.FromArgb(0x40, 0x40, 0x40);     // dark gray 64;64;64
             GlobalVarEnabled = false;
         }
     }

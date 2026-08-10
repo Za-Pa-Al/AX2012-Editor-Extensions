@@ -121,8 +121,9 @@ namespace JAEE.AX.EditorExtensions
         {
             DisplayName = "X++ Parameter variable";
             var c = EditorSettings.getInstance().SyntaxHighlighter.ParameterColor;
-            if (c.A == 0) c = System.Drawing.Color.FromArgb(0x66, 0x66, 0x66); // unset -> default gray
+            if (c.A == 0) c = System.Drawing.Color.FromArgb(0x40, 0x40, 0x40); // unset -> default gray
             ForegroundColor = Color.FromArgb(c.A, c.R, c.G, c.B);
+            IsItalic = true;
         }
     }
 
@@ -136,7 +137,7 @@ namespace JAEE.AX.EditorExtensions
         {
             DisplayName = "X++ Local variable";
             var c = EditorSettings.getInstance().SyntaxHighlighter.LocalColor;
-            if (c.A == 0) c = System.Drawing.Color.FromArgb(0x66, 0x66, 0x66); // unset -> default gray
+            if (c.A == 0) c = System.Drawing.Color.FromArgb(0x40, 0x40, 0x40); // unset -> default gray
             ForegroundColor = Color.FromArgb(c.A, c.R, c.G, c.B);
         }
     }

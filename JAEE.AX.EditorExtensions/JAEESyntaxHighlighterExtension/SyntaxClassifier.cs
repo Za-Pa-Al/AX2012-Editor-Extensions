@@ -46,9 +46,9 @@ namespace JAEE.AX.EditorExtensions
         {
             switch (cat)
             {
-                case HighlightCategory.Type:   return ClassificationTypeNames.XppType;
-                case HighlightCategory.Macro:  return ClassificationTypeNames.XppMacro;
-                case HighlightCategory.Method: return ClassificationTypeNames.XppMethod;
+                case HighlightCategory.Type:   return XppClassificationNames.Type;
+                case HighlightCategory.Macro:  return XppClassificationNames.Macro;
+                case HighlightCategory.Method: return XppClassificationNames.Method;
                 default: return string.Empty;
             }
         }

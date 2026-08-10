@@ -71,10 +71,10 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <!-- MEF tagger files -->
-    <Compile Include="ClassificationDefinitions.cs" />
-    <Compile Include="SyntaxTagger.cs" />
-    <Compile Include="SyntaxTaggerProvider.cs" />
+    <!-- MEF classifier files (experiment: IClassifier path) -->
+    <Compile Include="ClassificationTypes.cs" />
+    <Compile Include="SyntaxClassifier.cs" />
+    <Compile Include="SyntaxClassifierProvider.cs" />
     <!-- Pure detection core (no VS deps) -->
     <Compile Include="XppSyntaxDetector.cs" />
     <!-- Shared lexer source — linked from JAEEFormatExtension -->

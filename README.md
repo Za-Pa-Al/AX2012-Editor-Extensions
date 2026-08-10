@@ -17,7 +17,7 @@ Modernized to **.NET Framework 4.8** (builds under Build Tools — no VS2010 SDK
 ## Building &amp; releasing
 
 - **Build:** open `JAEE.AX.EditorExtensions/JAEE.AX.EditorExtensions.sln`. First place the six Microsoft VS editor DLLs in `References/` — see [`References/README.md`](References/README.md). (`JAEERefactorRenameExtension` isn't in the .sln; build that project on its own.)
-- **Version — one place for all assemblies:** [`JAEE.AX.EditorExtensions/SharedAssemblyInfo.cs`](JAEE.AX.EditorExtensions/SharedAssemblyInfo.cs) (currently **1.3.0.0**). To ship a new version, edit the two numbers there, rebuild, then tag/release. e.g. for 1.4.0:
+- **Version — one place for all assemblies:** [`JAEE.AX.EditorExtensions/SharedAssemblyInfo.cs`](JAEE.AX.EditorExtensions/SharedAssemblyInfo.cs) (currently **1.3.1.0**). To ship a new version, edit the two numbers there, rebuild, then tag/release. e.g. for 1.4.0:
 
   ```csharp
   [assembly: AssemblyVersion("1.4.0.0")]

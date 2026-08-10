@@ -234,6 +234,41 @@ namespace JAEE.AX.EditorExtensions.Format.Tests
                 "void f(){ test2 = test as AccDistConstPayroll; }",
                 spans => !HasSpan(spans, "as", "void f(){ test2 = test as AccDistConstPayroll; }", HighlightCategory.Type));
 
+            // ---- Scope-aware variable tests (buffer == one method) ----
+
+            ClassifierCase("parameter variable is italic (Parameter)",
+                "void main(Args _args){ _args.parmEnum(); }",
+                spans => HasSpan(spans, "_args", "void main(Args _args){ _args.parmEnum(); }", HighlightCategory.Parameter));
+
+            ClassifierCase("local variable is unstyled (neither Parameter nor GlobalVar)",
+                "void f(){ container record; record = conNull(); }",
+                spans => !HasSpan(spans, "record", "void f(){ container record; record = conNull(); }", HighlightCategory.GlobalVar)
+                      && !HasSpan(spans, "record", "void f(){ container record; record = conNull(); }", HighlightCategory.Parameter));
+
+            ClassifierCase("non-local variable is bold (GlobalVar)",
+                "void f(){ custTable.AccountNum = '1'; }",
+                spans => HasSpan(spans, "custTable", "void f(){ custTable.AccountNum = '1'; }", HighlightCategory.GlobalVar));
+
+            ClassifierCase("member after '.' is not a variable",
+                "void f(){ int x; x = obj.Field; }",
+                spans => !HasSpan(spans, "Field", "void f(){ int x; x = obj.Field; }", HighlightCategory.GlobalVar));
+
+            // Full screenshot method: file/record/fileUpload are locals (unstyled),
+            // info/strFmt/conPeek are global functions, AsciiStreamIo is a type.
+            {
+                string src = "public static void main(Args _args){ AsciiStreamIo file; container record; "
+                           + "file = AsciiStreamIo::constructForRead(x); record = file.read(); "
+                           + "info(strFmt(\"%1\", conPeek(record, 1))); }";
+                ClassifierCase("screenshot: local 'file' not bolded",
+                    src, spans => !HasSpan(spans, "file", src, HighlightCategory.GlobalVar));
+                ClassifierCase("screenshot: local 'record' not bolded",
+                    src, spans => !HasSpan(spans, "record", src, HighlightCategory.GlobalVar));
+                ClassifierCase("screenshot: global 'info' is MethodGlobal",
+                    src, spans => HasSpan(spans, "info", src, HighlightCategory.MethodGlobal));
+                ClassifierCase("screenshot: type 'AsciiStreamIo' is Type",
+                    src, spans => HasSpan(spans, "AsciiStreamIo", src, HighlightCategory.Type));
+            }
+
             Console.WriteLine();
             Console.WriteLine(_failures == 0 ? "ALL TESTS PASSED" : $"{_failures} ASSERTION(S) FAILED");
             return _failures;

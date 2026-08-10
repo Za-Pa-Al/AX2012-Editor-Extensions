@@ -13,6 +13,8 @@ namespace JAEE.AX.EditorExtensions
         private Color  methodColor;
         private bool   methodGlobalEnabled;
         private Color  methodGlobalColor;
+        private bool   parameterEnabled;
+        private bool   globalVarEnabled;
 
         [DisplayName("Type - Enabled"), Category("Types"), DefaultValue(true),
          Description("Color user-defined and system types (e.g. SalesTable, System.IO.Stream).")]
@@ -46,6 +48,14 @@ namespace JAEE.AX.EditorExtensions
          Description("Foreground color for global/free function calls.")]
         public Color MethodGlobalColor  { get { return methodGlobalColor; }   set { methodGlobalColor = value; } }
 
+        [DisplayName("Parameter - Italic"), Category("Variables"), DefaultValue(true),
+         Description("Render method parameter variables in italic (keeps default color).")]
+        public bool ParameterEnabled { get { return parameterEnabled; } set { parameterEnabled = value; } }
+
+        [DisplayName("Non-local variable - Bold"), Category("Variables"), DefaultValue(true),
+         Description("Render variables not declared in the current method (fields/globals) in bold. Heuristic; may bold enum values, table fields, and macro names.")]
+        public bool GlobalVarEnabled { get { return globalVarEnabled; } set { globalVarEnabled = value; } }
+
         private SyntaxHighlighterProperties() { }
 
         public SyntaxHighlighterProperties(JAEESyntaxHighlighterSettings settings)
@@ -58,6 +68,8 @@ namespace JAEE.AX.EditorExtensions
             methodColor         = settings.MethodColor;
             methodGlobalEnabled = settings.MethodGlobalEnabled;
             methodGlobalColor   = settings.MethodGlobalColor;
+            parameterEnabled    = settings.ParameterEnabled;
+            globalVarEnabled    = settings.GlobalVarEnabled;
         }
     }
 }

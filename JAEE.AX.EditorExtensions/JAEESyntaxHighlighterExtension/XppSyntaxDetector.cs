@@ -156,7 +156,109 @@ namespace JAEE.AX.EditorExtensions
                 }
             }
 
+            // ---- Pass 3: variables (scope-aware) ----
+            // The buffer is a single method (or classDeclaration), so its whole scope is
+            // visible: the signature gives parameters, declarations give locals. Any other
+            // referenced identifier is non-local ("global"). Parameters -> italic, non-local
+            // -> bold, locals -> unstyled (no span emitted).
+            var paramNames = new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
+            var localNames = new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
+            CollectScope(sig, paramNames, localNames);
+
+            for (int j = 0; j < sig.Count; j++)
+            {
+                if (covered.Contains(j)) continue;            // already a Type/Macro
+                var t = sig[j];
+                if (t.Type != TokenType.Word) continue;
+                if (IsLanguageKeyword(t.Value)) continue;
+                if (t.Value.Length > 0 && t.Value[0] == '#') continue;                 // macro ref
+                if (j + 1 < sig.Count && sig[j + 1].Value == "(") continue;            // call
+                if (j > 0 && (sig[j - 1].Value == "." || sig[j - 1].Value == "::")) continue; // member
+
+                if (paramNames.Contains(t.Value))
+                    results.Add(new DetectedSpan(t.SourceStart, t.Value.Length, HighlightCategory.Parameter));
+                else if (localNames.Contains(t.Value))
+                    { /* local variable: leave unstyled */ }
+                else
+                    results.Add(new DetectedSpan(t.SourceStart, t.Value.Length, HighlightCategory.GlobalVar));
+            }
+
             return results;
+        }
+
+        // Builds the method's scope: parameter names (from the signature) and local names
+        // (from declaration statements). Buffer == one method, so this is the full scope.
+        private static void CollectScope(List<Token> sig, HashSet<string> paramNames, HashSet<string> localNames)
+        {
+            // First '{' separates the signature from the body.
+            int braceIdx = -1;
+            for (int i = 0; i < sig.Count; i++)
+                if (sig[i].Value == "{") { braceIdx = i; break; }
+
+            // Parameters: the '(...)' immediately before the first '{' is the signature list.
+            if (braceIdx > 0)
+            {
+                int closeParen = -1;
+                for (int i = braceIdx - 1; i >= 0; i--)
+                    if (sig[i].Value == ")") { closeParen = i; break; }
+
+                if (closeParen > 0)
+                {
+                    int depth = 0, openParen = -1;
+                    for (int i = closeParen; i >= 0; i--)
+                    {
+                        if (sig[i].Value == ")") depth++;
+                        else if (sig[i].Value == "(") { depth--; if (depth == 0) { openParen = i; break; } }
+                    }
+                    if (openParen >= 0)
+                    {
+                        // A parameter name is a Word directly followed by ',' ')' or '='.
+                        for (int i = openParen + 1; i < closeParen; i++)
+                            if (sig[i].Type == TokenType.Word)
+                            {
+                                string nx = sig[i + 1].Value;
+                                if (nx == "," || nx == ")" || nx == "=")
+                                    paramNames.Add(sig[i].Value);
+                            }
+                    }
+                }
+            }
+
+            // Locals: declaration statements in the body: <type>[.<w>]* <name> (,<name>)* [;|=]
+            int start = (braceIdx >= 0) ? braceIdx + 1 : 0;
+            int k = start;
+            while (k < sig.Count)
+            {
+                bool typeStart = sig[k].Type == TokenType.Word &&
+                                 (IsPrimitive(sig[k].Value) || !IsLanguageKeyword(sig[k].Value));
+                if (typeStart)
+                {
+                    int c = CollectChain(sig, k);   // consume dotted type chain
+                    if (c + 1 < sig.Count && sig[c + 1].Type == TokenType.Word && !IsLanguageKeyword(sig[c + 1].Value))
+                    {
+                        var names = new List<string> { sig[c + 1].Value };
+                        int p = c + 2;
+                        bool isDecl = false;
+                        while (p < sig.Count)
+                        {
+                            string v = sig[p].Value;
+                            if (v == ";" || v == "=") { isDecl = true; break; }
+                            if (v == "," && p + 1 < sig.Count && sig[p + 1].Type == TokenType.Word)
+                            { names.Add(sig[p + 1].Value); p += 2; continue; }
+                            break; // anything else -> not a plain declaration
+                        }
+                        if (isDecl)
+                        {
+                            foreach (var nm in names) localNames.Add(nm);
+                            int semi = p;
+                            while (semi < sig.Count && sig[semi].Value != ";") semi++;
+                            k = (semi < sig.Count) ? semi + 1 : sig.Count;
+                            continue;
+                        }
+                    }
+                }
+                k++;
+            }
         }
 
         // Returns the sig index of the last token in the dotted chain starting at start.

@@ -12,6 +12,8 @@ namespace JAEE.AX.EditorExtensions
         internal const string Macro        = "JAEE.Xpp.Macro";
         internal const string Method       = "JAEE.Xpp.Method";
         internal const string MethodGlobal = "JAEE.Xpp.MethodGlobal";
+        internal const string Parameter    = "JAEE.Xpp.Parameter";
+        internal const string GlobalVar    = "JAEE.Xpp.GlobalVar";
     }
 
     /// <summary>
@@ -38,6 +40,14 @@ namespace JAEE.AX.EditorExtensions
         [Export(typeof(ClassificationTypeDefinition))]
         [Name(XppClassificationNames.MethodGlobal)]
         internal static ClassificationTypeDefinition MethodGlobalDef;
+
+        [Export(typeof(ClassificationTypeDefinition))]
+        [Name(XppClassificationNames.Parameter)]
+        internal static ClassificationTypeDefinition ParameterDef;
+
+        [Export(typeof(ClassificationTypeDefinition))]
+        [Name(XppClassificationNames.GlobalVar)]
+        internal static ClassificationTypeDefinition GlobalVarDef;
 #pragma warning restore 649
     }
 
@@ -96,6 +106,33 @@ namespace JAEE.AX.EditorExtensions
             DisplayName = "X++ Method (global function)";
             var c = EditorSettings.getInstance().SyntaxHighlighter.MethodGlobalColor;
             ForegroundColor = Color.FromArgb(c.A, c.R, c.G, c.B);
+        }
+    }
+
+    // Font-style only (no foreground) so the text keeps its default color.
+    [Export(typeof(EditorFormatDefinition))]
+    [ClassificationType(ClassificationTypeNames = XppClassificationNames.Parameter)]
+    [Name("JAEE.Xpp.Parameter.Format")]
+    [UserVisible(true)]
+    internal sealed class XppParameterFormat : ClassificationFormatDefinition
+    {
+        internal XppParameterFormat()
+        {
+            DisplayName = "X++ Parameter variable";
+            IsItalic = true;
+        }
+    }
+
+    [Export(typeof(EditorFormatDefinition))]
+    [ClassificationType(ClassificationTypeNames = XppClassificationNames.GlobalVar)]
+    [Name("JAEE.Xpp.GlobalVar.Format")]
+    [UserVisible(true)]
+    internal sealed class XppGlobalVarFormat : ClassificationFormatDefinition
+    {
+        internal XppGlobalVarFormat()
+        {
+            DisplayName = "X++ Non-local variable";
+            IsBold = true;
         }
     }
 }

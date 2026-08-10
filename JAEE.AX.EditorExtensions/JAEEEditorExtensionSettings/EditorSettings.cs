@@ -16,6 +16,7 @@ namespace JAEE.AX.EditorExtensions
         public JAEEHighlightWordSettings HighlightWord;
         public JAEECurrentLineHighlightSettings HighlightCurrentLine;
         public JAEEBraceMatchingSettings BraceMatching;
+        public JAEESyntaxHighlighterSettings SyntaxHighlighter;
 
         /// <summary>
         /// Create instance with default values
@@ -26,6 +27,7 @@ namespace JAEE.AX.EditorExtensions
             HighlightWord = new JAEEHighlightWordSettings();
             HighlightCurrentLine = new JAEECurrentLineHighlightSettings();
             BraceMatching = new JAEEBraceMatchingSettings();
+            SyntaxHighlighter = new JAEESyntaxHighlighterSettings();
         }
 
         /// <summary>
@@ -60,6 +62,8 @@ namespace JAEE.AX.EditorExtensions
                             SoapFormatter formatter = new SoapFormatter();
                             settings = formatter.Deserialize(fs) as EditorSettings;
                             fs.Close();
+                            if (settings != null && settings.SyntaxHighlighter == null)
+                                settings.SyntaxHighlighter = new JAEESyntaxHighlighterSettings();
                         }
                     }
                 }

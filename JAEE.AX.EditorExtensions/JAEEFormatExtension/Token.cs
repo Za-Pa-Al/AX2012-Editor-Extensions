@@ -29,6 +29,13 @@ namespace JAEE.AX.EditorExtensions.Format
         /// <summary>Set on a '(' whose argument list spans multiple source lines.</summary>
         public bool GroupMultiline;
 
+        /// <summary>Set on a ternary '?' / ':' that should start its own (indented) line,
+        /// because the ternary was written across multiple source lines.</summary>
+        public bool BreakBefore;
+
+        /// <summary>Character offset of this token's first character in the source string.</summary>
+        public int SourceStart;
+
         public Token(TokenType type, string value)
         {
             Type = type;

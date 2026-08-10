@@ -25,6 +25,9 @@ namespace JAEE.AX.EditorExtensions
             HighlightLineProperties highlightLineProperties = new HighlightLineProperties(singletonSettings.HighlightCurrentLine);
             this.propHighlightLine.SelectedObject = highlightLineProperties;
 
+            SyntaxHighlighterProperties syntaxHighlighterProperties = new SyntaxHighlighterProperties(singletonSettings.SyntaxHighlighter);
+            this.propSyntaxHighlighter.SelectedObject = syntaxHighlighterProperties;
+
             nRows.Value = singletonSettings.Outlining.MaxRowsInTooltip;
         }
 
@@ -32,6 +35,7 @@ namespace JAEE.AX.EditorExtensions
         {
             HighlightWordProperties propHighlightWord = (HighlightWordProperties)this.propHighlightWord.SelectedObject;
             HighlightLineProperties propHighlightLine = (HighlightLineProperties)this.propHighlightLine.SelectedObject;
+            SyntaxHighlighterProperties propSyntaxHighlighter = (SyntaxHighlighterProperties)this.propSyntaxHighlighter.SelectedObject;
 
             singletonSettings = EditorSettings.getInstance();
 
@@ -44,9 +48,17 @@ namespace JAEE.AX.EditorExtensions
             singletonSettings.HighlightCurrentLine.FrameColor = propHighlightLine.FrameColor;
             singletonSettings.HighlightCurrentLine.BackOpacity = propHighlightLine.BackOpacity;
 
-            // Outlining 
+            // Outlining
             singletonSettings.Outlining.MaxRowsInTooltip = Convert.ToInt32(nRows.Value);
-            
+
+            // Syntax highlighter
+            singletonSettings.SyntaxHighlighter.TypeEnabled   = propSyntaxHighlighter.TypeEnabled;
+            singletonSettings.SyntaxHighlighter.TypeColor     = propSyntaxHighlighter.TypeColor;
+            singletonSettings.SyntaxHighlighter.MacroEnabled  = propSyntaxHighlighter.MacroEnabled;
+            singletonSettings.SyntaxHighlighter.MacroColor    = propSyntaxHighlighter.MacroColor;
+            singletonSettings.SyntaxHighlighter.MethodEnabled = propSyntaxHighlighter.MethodEnabled;
+            singletonSettings.SyntaxHighlighter.MethodColor   = propSyntaxHighlighter.MethodColor;
+
             singletonSettings.saveChanges();
         }
 

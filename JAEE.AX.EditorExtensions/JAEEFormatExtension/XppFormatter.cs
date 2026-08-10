@@ -32,9 +32,11 @@ namespace JAEE.AX.EditorExtensions.Format
                 if (sig.Count == 0) return source;
                 BalancedTokens(sig);
                 MarkCommaBreaks(sig);
+                MarkTernaryBreaks(sig);
 
                 string rendered = new Renderer(sig).Run();
                 string aligned = AlignColumns(rendered);
+                aligned = EnsureBlankAfterDeclarations(aligned);
 
                 string body = aligned.TrimEnd('\n', '\r', ' ', '\t');
                 char lastChar = source[source.Length - 1];
@@ -215,6 +217,12 @@ namespace JAEE.AX.EditorExtensions.Format
         // after every top-level comma in it (and mark the '(' so the renderer can indent
         // the continuation). If it is all on one line, it is reflowed to one line. This
         // mirrors the ReSharper/Prettier "chop when multiline" rule the user described.
+        private static bool IsWrapOpen(string v) => v == "(" || v == "[";
+
+        // words after which '[' opens a literal (keeps a space) rather than indexing
+        private static readonly HashSet<string> BracketLiteralKeywords =
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "return", "throw", "case", "in" };
+
         private static void MarkCommaBreaks(List<Token> tokens)
         {
             var multiline = new bool[tokens.Count];
@@ -222,7 +230,7 @@ namespace JAEE.AX.EditorExtensions.Format
             for (int k = 0; k < tokens.Count; k++)
             {
                 Token t = tokens[k];
-                if (t.NewlinesBefore >= 1 && stack.Count > 0 && tokens[stack.Peek()].Value == "(")
+                if (t.NewlinesBefore >= 1 && stack.Count > 0 && IsWrapOpen(tokens[stack.Peek()].Value))
                     multiline[stack.Peek()] = true;
                 if (t.Type == TokenType.Punctuation)
                 {
@@ -232,7 +240,7 @@ namespace JAEE.AX.EditorExtensions.Format
             }
 
             for (int k = 0; k < tokens.Count; k++)
-                if (tokens[k].Type == TokenType.Punctuation && tokens[k].Value == "(")
+                if (tokens[k].Type == TokenType.Punctuation && IsWrapOpen(tokens[k].Value))
                     tokens[k].GroupMultiline = multiline[k];
 
             stack = new Stack<int>();
@@ -242,12 +250,52 @@ namespace JAEE.AX.EditorExtensions.Format
                 if (t.Type != TokenType.Punctuation) continue;
                 if (t.Value == ",")
                 {
-                    if (stack.Count > 0 && tokens[stack.Peek()].Value == "(" && multiline[stack.Peek()])
+                    if (stack.Count > 0 && IsWrapOpen(tokens[stack.Peek()].Value) && multiline[stack.Peek()])
                         t.BreakAfter = true;
                 }
                 else if (t.Value == "(" || t.Value == "[") stack.Push(k);
                 else if (t.Value == ")" || t.Value == "]") { if (stack.Count > 0) stack.Pop(); }
             }
+        }
+
+        // ---- ternary chop --------------------------------------------------
+
+        // A ternary "cond ? a : b" that the author wrote across multiple source lines is
+        // chopped so the '?' and ':' each start their own line (indented one level). A
+        // ternary that fits on one line is left inline. Matching '?'/':' is LIFO so nested
+        // ternaries pair correctly; the stack resets at statement/block boundaries.
+        private static void MarkTernaryBreaks(List<Token> t)
+        {
+            var qStack = new Stack<int>();
+            for (int i = 0; i < t.Count; i++)
+            {
+                Token tk = t[i];
+                if (tk.Type == TokenType.Punctuation && (tk.Value == ";" || tk.Value == "{" || tk.Value == "}"))
+                {
+                    qStack.Clear();
+                }
+                else if (tk.Type == TokenType.Operator && tk.Value == "?")
+                {
+                    qStack.Push(i);
+                }
+                else if (tk.Type == TokenType.Punctuation && tk.Value == ":" && qStack.Count > 0)
+                {
+                    int q = qStack.Pop();
+                    if (TernaryIsMultiline(t, q, i))
+                    {
+                        t[q].BreakBefore = true;
+                        t[i].BreakBefore = true;
+                    }
+                }
+            }
+        }
+
+        private static bool TernaryIsMultiline(List<Token> t, int q, int colon)
+        {
+            int end = Math.Min(colon + 1, t.Count - 1);
+            for (int k = q; k <= end; k++)
+                if (t[k].NewlinesBefore >= 1) return true;
+            return false;
         }
 
         // ---- Phase A: render ------------------------------------------------
@@ -266,6 +314,7 @@ namespace JAEE.AX.EditorExtensions.Format
             private readonly Stack<bool> _controlParen = new Stack<bool>();
             private readonly Stack<bool> _wrapParen = new Stack<bool>(); // is this paren a multiline arg list
             private readonly Stack<int> _argCol = new Stack<int>();      // content column of each multiline arg list
+            private readonly Stack<int> _ternaryCol = new Stack<int>();  // '=' column each chopped ternary aligns to
 
             // switch/case: one entry per open brace. _switchBrace[i] = that block is a
             // switch body; _caseActive[i] = we are past a case/default label in it, so its
@@ -331,6 +380,18 @@ namespace JAEE.AX.EditorExtensions.Format
                         continue;
                     }
 
+                    // 4. ternary '?' / ':' on its own line, aligned under the '='
+                    if (!_inline && t.BreakBefore && !_lineStart)
+                    {
+                        int col;
+                        if (t.Value == "?") { col = TernaryAlignColumn(); _ternaryCol.Push(col); }
+                        else { col = _ternaryCol.Count > 0 ? _ternaryCol.Pop() : Tab * (IndentLevel() + 1); }
+                        TrimLineEnd();
+                        _sb.Append('\n');
+                        _sb.Append(new string(' ', col));
+                        _lineStart = true;
+                    }
+
                     bool suppress = _noSpaceAfter;
                     _noSpaceAfter = false;
 
@@ -362,8 +423,8 @@ namespace JAEE.AX.EditorExtensions.Format
                     case ";": EmitSemicolon(next, ref idx); return true;
                     case "(": EmitOpenParen(t, suppress); return true;
                     case ")": EmitCloseParen(next); return true;
-                    case "[": Attach("["); return true;
-                    case "]": Attach("]"); return true;
+                    case "[": EmitOpenBracket(t); return true;
+                    case "]": EmitCloseBracket(); return true;
                     case ",": EmitComma(t); return true;
                     case ".": Attach("."); return true;
                     case "::": Attach("::"); return true;
@@ -452,6 +513,37 @@ namespace JAEE.AX.EditorExtensions.Format
             }
 
             // --- parentheses ---
+            // '[' / ']' participate in the same "chop when multiline" tracking as '(' / ')',
+            // so a container/array literal written across lines chops one element per line
+            // aligned under the '['.
+            private void EmitOpenBracket(Token t)
+            {
+                // '[' is an index when it follows a value (identifier / ) / ] / number) →
+                // tight: arr[i]. Otherwise it opens a container/array literal and keeps the
+                // preceding spacing: '= [', 'return [', ', ['.
+                bool index = _prev != null &&
+                    (_prev.Type == TokenType.Number || _prev.Value == ")" || _prev.Value == "]" ||
+                     (_prev.Type == TokenType.Word && !BracketLiteralKeywords.Contains(_prev.Value)));
+                if (index)
+                {
+                    Attach("[");
+                }
+                else
+                {
+                    if (!_lineStart && NeedsSpaceBeforeValue()) _sb.Append(' ');
+                    _sb.Append('[');
+                    _lineStart = false;
+                }
+                _wrapParen.Push(t.GroupMultiline);
+                if (t.GroupMultiline) _argCol.Push(CurrentColumn());
+            }
+
+            private void EmitCloseBracket()
+            {
+                if (_wrapParen.Count > 0 && _wrapParen.Pop()) { if (_argCol.Count > 0) _argCol.Pop(); }
+                Attach("]");
+            }
+
             private void EmitComma(Token t)
             {
                 Attach(",");
@@ -477,6 +569,18 @@ namespace JAEE.AX.EditorExtensions.Format
                 for (int i = _sb.Length - 1; i >= 0; i--)
                     if (_sb[i] == '\n') { nl = i; break; }
                 return _sb.Length - (nl + 1);
+            }
+
+            // column of the assignment '=' on the current line (so a chopped ternary's
+            // '?' / ':' line up under it); falls back to one indent level in.
+            private int TernaryAlignColumn()
+            {
+                int lineStart = _sb.Length;
+                while (lineStart > 0 && _sb[lineStart - 1] != '\n') lineStart--;
+                for (int k = lineStart; k + 2 < _sb.Length; k++)
+                    if (_sb[k] == ' ' && _sb[k + 1] == '=' && _sb[k + 2] == ' ')
+                        return (k + 1) - lineStart;
+                return Tab * (IndentLevel() + 1);
             }
 
             private void EmitOpenParen(Token t, bool suppress)
@@ -920,7 +1024,7 @@ namespace JAEE.AX.EditorExtensions.Format
         // ---- Phase B: column alignment -------------------------------------
 
         private static readonly Regex DeclRe = new Regex(
-            @"^(?<indent>[ \t]*)(?<type>[A-Za-z_][A-Za-z0-9_]*(?:\s*<[^;{}]*>)?(?:\s*\[\s*\])?)[ \t]+" +
+            @"^(?<indent>[ \t]*)(?<type>[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*(?:\s*<[^;{}]*>)?(?:\s*\[\s*\])?)[ \t]+" +
             @"(?<name>[A-Za-z_][A-Za-z0-9_]*)[ \t]*" +
             @"(?:(?<eq>(?<![=<>!+\-*/%&|^])=(?!=))[ \t]*(?<rhs>[^;]*?))?[ \t]*;[ \t]*(?<comment>//.*)?$",
             RegexOptions.Compiled);
@@ -945,8 +1049,20 @@ namespace JAEE.AX.EditorExtensions.Format
         // independent alignment sub-groups.
         private const bool BlanksBreakAlignment = false;
 
+        // Start a new alignment group when one line's align width is BOTH more than
+        // WidthSplitRatio times another's AND at least WidthSplitAbs chars wider — keeps
+        // short types (int) from being dragged wide by a long one (System.Windows.Controls
+        // .ItemCollection), while not splitting merely moderate differences (int vs SalesTable).
+        private const int WidthSplitRatio = 3;
+        private const int WidthSplitAbs = 10;
+
         // line kinds
         private const int KOther = 0, KDecl = 1, KAssign = 2, KComment = 3, KBlank = 4;
+
+        // the width that drives alignment for a line: the type for a declaration, the lhs
+        // for an assignment.
+        private static int AlignWidth(int kind, Match m) =>
+            kind == KDecl ? Collapse(m.Groups["type"].Value).Length : m.Groups["lhs"].Value.Length;
 
         private static string AlignColumns(string text)
         {
@@ -987,9 +1103,19 @@ namespace JAEE.AX.EditorExtensions.Format
                 int k0 = kind[i];
                 string ind0 = indent[i];
                 gid[i] = g;
+                int groupW = AlignWidth(kind[i], match[i]);
                 for (int j = i + 1; j < n; j++)
                 {
-                    if (kind[j] == k0 && indent[j] == ind0) { gid[j] = g; }
+                    if (kind[j] == k0 && indent[j] == ind0)
+                    {
+                        // split the group when the align widths differ a lot, so short
+                        // types don't get dragged wide by a long one (and vice-versa)
+                        int w = AlignWidth(kind[j], match[j]);
+                        int lo = Math.Min(w, groupW), hi = Math.Max(w, groupW);
+                        if (lo > 0 && hi > lo * WidthSplitRatio && hi - lo >= WidthSplitAbs) break;
+                        groupW = Math.Max(groupW, w);
+                        gid[j] = g;
+                    }
                     else if (kind[j] == KComment) { /* transparent */ }
                     else if (kind[j] == KBlank && !BlanksBreakAlignment) { /* transparent */ }
                     else break;
@@ -1082,6 +1208,47 @@ namespace JAEE.AX.EditorExtensions.Format
 
         // collapse internal whitespace in a captured type (e.g. "List < str >" -> "List<str>")
         private static string Collapse(string s) => Regex.Replace(s.Trim(), @"\s+", "");
+
+        private static int ClassifyKind(string raw)
+        {
+            if (raw.Trim().Length == 0) return KBlank;
+            if (raw.TrimStart().StartsWith("//")) return KComment;
+            Match d = DeclRe.Match(raw);
+            if (d.Success && !NotAType.Contains(FirstWord(d.Groups["type"].Value))) return KDecl;
+            Match a = AssignRe.Match(raw);
+            if (a.Success && !NotAType.Contains(FirstWord(a.Groups["lhs"].Value))) return KAssign;
+            return KOther;
+        }
+
+        // Ensure a blank line separates a block of local declarations from the code that
+        // follows it. Does nothing if a blank line (or the traditional lone ';' empty
+        // statement plus a blank) is already there. Idempotent.
+        private static string EnsureBlankAfterDeclarations(string text)
+        {
+            var lines = new List<string>(text.Split('\n'));
+            int n = lines.Count;
+            var kind = new int[n];
+            for (int i = 0; i < n; i++) kind[i] = ClassifyKind(lines[i]);
+
+            var inserts = new List<int>();
+            for (int i = 0; i < n; i++)
+            {
+                if (kind[i] != KDecl) continue;
+                // first real code line after i, skipping comments, blanks and a lone ';'
+                int j = i + 1;
+                while (j < n && (kind[j] == KComment || kind[j] == KBlank || lines[j].Trim() == ";")) j++;
+                if (j >= n || kind[j] == KDecl) continue;          // more declarations follow
+                if (lines[j].TrimStart().StartsWith("}")) continue; // block closes, no code
+                bool hasBlank = false;
+                for (int k = i + 1; k < j; k++) if (kind[k] == KBlank) { hasBlank = true; break; }
+                if (hasBlank) continue;
+                inserts.Add(i + 1 < j && lines[i + 1].Trim() == ";" ? i + 1 : i);
+            }
+
+            for (int m = inserts.Count - 1; m >= 0; m--)
+                lines.Insert(inserts[m] + 1, "");
+            return string.Join("\n", lines);
+        }
 
         // ---- safety verifier ------------------------------------------------
 

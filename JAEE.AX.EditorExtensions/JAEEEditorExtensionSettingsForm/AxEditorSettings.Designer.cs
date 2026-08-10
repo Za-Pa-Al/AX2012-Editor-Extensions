@@ -43,11 +43,15 @@
             this.tabPageHighlightLine = new System.Windows.Forms.TabPage();
             this.label3 = new System.Windows.Forms.Label();
             this.propHighlightLine = new System.Windows.Forms.PropertyGrid();
+            this.tabPageSyntaxHighlighter = new System.Windows.Forms.TabPage();
+            this.labelSyntaxHighlighter = new System.Windows.Forms.Label();
+            this.propSyntaxHighlighter = new System.Windows.Forms.PropertyGrid();
             this.tabControl1.SuspendLayout();
             this.tabPageHighlightWords.SuspendLayout();
             this.tabPageOutlining.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nRows)).BeginInit();
             this.tabPageHighlightLine.SuspendLayout();
+            this.tabPageSyntaxHighlighter.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -101,6 +105,7 @@
             this.tabControl1.Controls.Add(this.tabPageHighlightWords);
             this.tabControl1.Controls.Add(this.tabPageHighlightLine);
             this.tabControl1.Controls.Add(this.tabPageOutlining);
+            this.tabControl1.Controls.Add(this.tabPageSyntaxHighlighter);
             this.tabControl1.Location = new System.Drawing.Point(12, 12);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -203,9 +208,41 @@
             this.propHighlightLine.Size = new System.Drawing.Size(296, 196);
             this.propHighlightLine.TabIndex = 10;
             this.propHighlightLine.ToolbarVisible = false;
-            // 
+            //
+            // tabPageSyntaxHighlighter
+            //
+            this.tabPageSyntaxHighlighter.Controls.Add(this.labelSyntaxHighlighter);
+            this.tabPageSyntaxHighlighter.Controls.Add(this.propSyntaxHighlighter);
+            this.tabPageSyntaxHighlighter.Location = new System.Drawing.Point(4, 22);
+            this.tabPageSyntaxHighlighter.Name = "tabPageSyntaxHighlighter";
+            this.tabPageSyntaxHighlighter.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageSyntaxHighlighter.Size = new System.Drawing.Size(317, 242);
+            this.tabPageSyntaxHighlighter.TabIndex = 3;
+            this.tabPageSyntaxHighlighter.Text = "Syntax Colors";
+            this.tabPageSyntaxHighlighter.UseVisualStyleBackColor = true;
+            //
+            // labelSyntaxHighlighter
+            //
+            this.labelSyntaxHighlighter.AutoSize = true;
+            this.labelSyntaxHighlighter.Font = new System.Drawing.Font("Segoe UI", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelSyntaxHighlighter.Location = new System.Drawing.Point(8, 9);
+            this.labelSyntaxHighlighter.Name = "labelSyntaxHighlighter";
+            this.labelSyntaxHighlighter.Size = new System.Drawing.Size(240, 25);
+            this.labelSyntaxHighlighter.TabIndex = 0;
+            this.labelSyntaxHighlighter.Text = "Semantic syntax highlighting";
+            //
+            // propSyntaxHighlighter
+            //
+            this.propSyntaxHighlighter.Font = new System.Drawing.Font("Segoe UI", 9.25F);
+            this.propSyntaxHighlighter.Location = new System.Drawing.Point(13, 37);
+            this.propSyntaxHighlighter.Name = "propSyntaxHighlighter";
+            this.propSyntaxHighlighter.PropertySort = System.Windows.Forms.PropertySort.Alphabetical;
+            this.propSyntaxHighlighter.Size = new System.Drawing.Size(296, 196);
+            this.propSyntaxHighlighter.TabIndex = 1;
+            this.propSyntaxHighlighter.ToolbarVisible = false;
+            //
             // AxEditorSettings
-            // 
+            //
             this.AcceptButton = this.btnOK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -229,6 +266,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.nRows)).EndInit();
             this.tabPageHighlightLine.ResumeLayout(false);
             this.tabPageHighlightLine.PerformLayout();
+            this.tabPageSyntaxHighlighter.ResumeLayout(false);
+            this.tabPageSyntaxHighlighter.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -250,6 +289,9 @@
         private System.Windows.Forms.TabPage tabPageHighlightLine;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.PropertyGrid propHighlightLine;
+        private System.Windows.Forms.TabPage tabPageSyntaxHighlighter;
+        private System.Windows.Forms.Label labelSyntaxHighlighter;
+        private System.Windows.Forms.PropertyGrid propSyntaxHighlighter;
     }
 }
 

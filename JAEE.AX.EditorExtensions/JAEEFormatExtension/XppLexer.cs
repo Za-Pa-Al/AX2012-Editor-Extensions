@@ -37,7 +37,7 @@ namespace JAEE.AX.EditorExtensions.Format
                 {
                     int start = i;
                     while (i < n && char.IsWhiteSpace(source[i])) i++;
-                    tokens.Add(new Token(TokenType.Space, source.Substring(start, i - start)));
+                    tokens.Add(new Token(TokenType.Space, source.Substring(start, i - start)) { SourceStart = start });
                     continue;
                 }
 
@@ -47,7 +47,7 @@ namespace JAEE.AX.EditorExtensions.Format
                     int start = i;
                     while (i < n && source[i] != '\n') i++;
                     string val = source.Substring(start, i - start).TrimEnd('\r', ' ', '\t');
-                    tokens.Add(new Token(TokenType.Directive, val));
+                    tokens.Add(new Token(TokenType.Directive, val) { SourceStart = start });
                     continue;
                 }
 
@@ -57,17 +57,18 @@ namespace JAEE.AX.EditorExtensions.Format
                     int start = i;
                     i++;
                     while (i < n && IsWord(source[i])) i++;
-                    tokens.Add(new Token(TokenType.Word, source.Substring(start, i - start)));
+                    tokens.Add(new Token(TokenType.Word, source.Substring(start, i - start)) { SourceStart = start });
                     continue;
                 }
 
                 // block comment
                 if (c == '/' && i + 1 < n && source[i + 1] == '*')
                 {
+                    int blockStart = i;
                     int end = source.IndexOf("*/", i + 2, StringComparison.Ordinal);
                     if (end < 0) throw new XppFormatException("Unclosed block comment.");
                     int stop = end + 2;
-                    tokens.Add(new Token(TokenType.Comment, source.Substring(i, stop - i)));
+                    tokens.Add(new Token(TokenType.Comment, source.Substring(i, stop - i)) { SourceStart = blockStart });
                     i = stop;
                     continue;
                 }
@@ -78,7 +79,7 @@ namespace JAEE.AX.EditorExtensions.Format
                     int start = i;
                     while (i < n && source[i] != '\n') i++;
                     string val = source.Substring(start, i - start).TrimEnd('\r');
-                    tokens.Add(new Token(TokenType.Comment, val));
+                    tokens.Add(new Token(TokenType.Comment, val) { SourceStart = start });
                     continue;
                 }
 
@@ -99,7 +100,7 @@ namespace JAEE.AX.EditorExtensions.Format
                         i++;
                     }
                     if (!closed) throw new XppFormatException("Unclosed string literal.");
-                    tokens.Add(new Token(TokenType.String, source.Substring(start, i - start)));
+                    tokens.Add(new Token(TokenType.String, source.Substring(start, i - start)) { SourceStart = start });
                     continue;
                 }
 
@@ -109,7 +110,7 @@ namespace JAEE.AX.EditorExtensions.Format
                     int start = i;
                     i++;
                     while (i < n && (IsWord(source[i]) || source[i] == '.')) i++;
-                    tokens.Add(new Token(TokenType.Number, source.Substring(start, i - start)));
+                    tokens.Add(new Token(TokenType.Number, source.Substring(start, i - start)) { SourceStart = start });
                     continue;
                 }
 
@@ -119,17 +120,18 @@ namespace JAEE.AX.EditorExtensions.Format
                     int start = i;
                     i++;
                     while (i < n && IsWord(source[i])) i++;
-                    tokens.Add(new Token(TokenType.Word, source.Substring(start, i - start)));
+                    tokens.Add(new Token(TokenType.Word, source.Substring(start, i - start)) { SourceStart = start });
                     continue;
                 }
 
                 // multi-char operator
                 bool matched = false;
+                int opStart = i;
                 foreach (var op in Operators)
                 {
                     if (i + op.Length <= n && string.CompareOrdinal(source, i, op, 0, op.Length) == 0)
                     {
-                        tokens.Add(new Token(TokenType.Operator, op));
+                        tokens.Add(new Token(TokenType.Operator, op) { SourceStart = opStart });
                         i += op.Length;
                         matched = true;
                         break;
@@ -138,11 +140,14 @@ namespace JAEE.AX.EditorExtensions.Format
                 if (matched) continue;
 
                 // single character
+                int singleStart = i;
                 char ch = source[i];
                 i++;
-                tokens.Add(SinglePunctuation.IndexOf(ch) >= 0
+                var singleTok = SinglePunctuation.IndexOf(ch) >= 0
                     ? new Token(TokenType.Punctuation, ch.ToString())
-                    : new Token(TokenType.Operator, ch.ToString()));
+                    : new Token(TokenType.Operator, ch.ToString());
+                singleTok.SourceStart = singleStart;
+                tokens.Add(singleTok);
             }
 
             return tokens;

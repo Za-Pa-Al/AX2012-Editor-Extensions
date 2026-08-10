@@ -10,6 +10,7 @@ copy /Y "%Publish%\JAEE.AX.EditorExtensions.Outlining.dll"             "%EditorC
 copy /Y "%Publish%\JAEE.AX.EditorExtensions.CurrentLineHighlight.dll"  "%EditorComponents%\"
 copy /Y "%Publish%\JAEE.AX.EditorExtensions.RefactorRename.dll"        "%EditorComponents%\"
 copy /Y "%Publish%\JAEE.AX.EditorExtensions.Format.dll"                "%EditorComponents%\"
+copy /Y "%Publish%\JAEE.AX.EditorExtensions.SyntaxHighlighter.dll"    "%EditorComponents%\"
 
 echo Deployed to: %EditorComponents%
 pause

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using JAEE.AX.EditorExtensions;
 using JAEE.AX.EditorExtensions.Format;
 
 namespace JAEE.AX.EditorExtensions.Format.Tests
@@ -77,6 +79,17 @@ namespace JAEE.AX.EditorExtensions.Format.Tests
                 "void f(){ foo(a, b, c); }",
                 ("foo(a, b, c)", o => o.Contains("foo(a, b, c)")));
 
+            Case("multiline container literal chops, not collapses",
+                "void f()\n{\n    container c = [1,\n2,\n3];\n}",
+                ("not collapsed", o => o.Contains("[1,\n")),
+                ("= [ keeps its space", o => o.Contains("= [")),
+                ("no =[ ", o => !o.Contains("=[")));
+
+            Case("one-line container stays; indexing stays tight",
+                "void f(){ container c = [1, 2, 3]; x = arr[i]; }",
+                ("[1, 2, 3] one line", o => o.Contains("[1, 2, 3]")),
+                ("arr[i] tight", o => o.Contains("arr[i]")));
+
             // --- alignment (comment transparent, whole block) ---
             Case("declaration block aligned across a comment",
                 "class C{\n    FormRadioControl a;\n    // note\n    FormReferenceControl b;\n}",
@@ -102,6 +115,48 @@ namespace JAEE.AX.EditorExtensions.Format.Tests
                 ("where present", o => o.Contains("where")),
                 ("single-quote string kept", o => o.Contains("'x'")));
 
+            // dotted types align; very different widths split into separate columns
+            Case("dotted types recognized and width-split",
+                "void f()\n{\n    int i;\n    str text;\n" +
+                "    System.Windows.Controls.TabControl tc = h.control();\n" +
+                "    System.Windows.Controls.TabItem tab;\n}",
+                ("short types share a column", o =>
+                    ColOfSecondWord(o, "int") == ColOfSecondWord(o, "str")),
+                ("dotted types share a column", o =>
+                    ColOfSecondWord(o, "System.Windows.Controls.TabControl") ==
+                    ColOfSecondWord(o, "System.Windows.Controls.TabItem")),
+                ("short and long are NOT the same column", o =>
+                    ColOfSecondWord(o, "int") != ColOfSecondWord(o, "System.Windows.Controls.TabControl")));
+
+            Case("moderately different widths stay together",
+                "void f()\n{\n    int i;\n    SalesTable st;\n    boolean ok;\n}",
+                ("int and SalesTable share a column", o =>
+                    ColOfSecondWord(o, "int") == ColOfSecondWord(o, "SalesTable")));
+
+            // --- ternary chop (? and : aligned under the =) ---
+            Case("multiline ternary chops, ? and : aligned under =",
+                "void f()\n{\n    context = cond ? trueBranch :\n            falseBranch;\n}",
+                ("condition stays on the = line", o => o.Contains("context = cond\n")),
+                ("? aligned under = (col 12)", o => o.Contains("\n            ? trueBranch")),
+                (": aligned under = (col 12)", o => o.Contains("\n            : falseBranch")));
+
+            Case("one-line ternary stays inline",
+                "void f(){ x = a ? b : c; }",
+                ("a ? b : c one line", o => o.Contains("x = a ? b : c;")));
+
+            // --- blank line after a declaration block ---
+            Case("blank inserted after declarations before code",
+                "void f()\n{\n    int i;\n    str text;\n    doWork(i);\n}",
+                ("blank after decls", o => o.Contains("str text;\n\n    doWork")));
+
+            Case("blank inserted after a lone ';' separator",
+                "void f()\n{\n    int i;\n    ;\n    doWork(i);\n}",
+                ("blank after the ;", o => o.Contains("    ;\n\n    doWork")));
+
+            Case("existing blank after declarations is not doubled",
+                "void f()\n{\n    int i;\n\n    doWork(i);\n}",
+                ("still a single blank", o => !o.Contains("int i;\n\n\n")));
+
             // --- safety ---
             Case("unbalanced input is a no-op",
                 "void f(){ if (a { b(); }",
@@ -112,9 +167,68 @@ namespace JAEE.AX.EditorExtensions.Format.Tests
                 "void f()\r\n{\r\nint x=1;\r\n}\r\n",
                 ("no lone LF", o => !System.Text.RegularExpressions.Regex.IsMatch(o, "(?<!\r)\n")));
 
+            // ---- Classifier tests ----
+
+            ClassifierCase("macro: directive token",
+                "#define.MyMacro(10)",
+                spans => HasCategory(spans, HighlightCategory.Macro));
+
+            ClassifierCase("macro: inline #ref",
+                "void f(){ x = #MyMacro; }",
+                spans => HasCategory(spans, HighlightCategory.Macro));
+
+            ClassifierCase("primitive type colored",
+                "void f(){ int x; }",
+                spans => HasSpan(spans, "int", "void f(){ int x; }", HighlightCategory.Type));
+
+            ClassifierCase("type before ::",
+                "void f(){ boolean b = NoYes::Yes; }",
+                spans => HasSpan(spans, "NoYes", "void f(){ boolean b = NoYes::Yes; }", HighlightCategory.Type));
+
+            ClassifierCase("type after new",
+                "void f(){ System.IO.MemoryStream ms = new System.IO.MemoryStream(); }",
+                spans => HasSpan(spans, "System.IO.MemoryStream", "void f(){ System.IO.MemoryStream ms = new System.IO.MemoryStream(); }", HighlightCategory.Type));
+
+            ClassifierCase("method call colored",
+                "void f(){ info(\"hello\"); }",
+                spans => HasSpan(spans, "info", "void f(){ info(\"hello\"); }", HighlightCategory.Method));
+
+            ClassifierCase("chained method colored (identifier only)",
+                "void f(){ _bitmap.MakeTransparent(); }",
+                spans => HasSpan(spans, "MakeTransparent", "void f(){ _bitmap.MakeTransparent(); }", HighlightCategory.Method));
+
+            ClassifierCase("new MemoryStream stays Type, not also Method",
+                "void f(){ System.IO.MemoryStream ms = new System.IO.MemoryStream(); }",
+                spans => !HasSpan(spans, "MemoryStream", "void f(){ System.IO.MemoryStream ms = new System.IO.MemoryStream(); }", HighlightCategory.Method));
+
+            ClassifierCase("if not colored as method",
+                "void f(){ if (a) { } }",
+                spans => !HasSpan(spans, "if", "void f(){ if (a) { } }", HighlightCategory.Method));
+
             Console.WriteLine();
             Console.WriteLine(_failures == 0 ? "ALL TESTS PASSED" : $"{_failures} ASSERTION(S) FAILED");
             return _failures;
+        }
+
+        private static void ClassifierCase(string name, string input, Func<List<DetectedSpan>, bool> check)
+        {
+            var spans = XppSyntaxDetector.Classify(input);
+            Assert(name, "classifier check", check(spans));
+        }
+
+        private static bool HasCategory(List<DetectedSpan> spans, HighlightCategory cat)
+        {
+            foreach (var s in spans) if (s.Category == cat) return true;
+            return false;
+        }
+
+        private static bool HasSpan(List<DetectedSpan> spans, string text, string source, HighlightCategory cat)
+        {
+            int idx = source.IndexOf(text, StringComparison.Ordinal);
+            if (idx < 0) return false;
+            foreach (var s in spans)
+                if (s.Category == cat && s.Start == idx && s.Length == text.Length) return true;
+            return false;
         }
 
         private static void Case(string name, string input, params (string label, Func<string, bool> check)[] checks)

@@ -10,14 +10,19 @@
     <RootNamespace>JAEE.AX.EditorExtensions.Format.Tests</RootNamespace>
   </PropertyGroup>
 
-  <!-- Link the VS-independent formatter core (compiled here as its own assembly so the
-       internal types are visible to the tests). The MEF files are NOT linked — they need
-       the Visual Studio editor assemblies. -->
+  <!-- Link the VS-independent formatter and highlighter cores. The MEF files are NOT
+       linked — they need the Visual Studio editor assemblies. -->
   <ItemGroup>
     <Compile Include="..\..\JAEEFormatExtension\Token.cs" Link="core\Token.cs" />
     <Compile Include="..\..\JAEEFormatExtension\XppLexer.cs" Link="core\XppLexer.cs" />
     <Compile Include="..\..\JAEEFormatExtension\XppFormatter.cs" Link="core\XppFormatter.cs" />
     <Compile Include="..\..\JAEEFormatExtension\FormatException.cs" Link="core\FormatException.cs" />
+    <Compile Include="..\..\JAEEEditorExtensionSettings\JAEESyntaxHighlighterSettings.cs" Link="core\JAEESyntaxHighlighterSettings.cs" />
+    <Compile Include="..\..\JAEESyntaxHighlighterExtension\XppSyntaxDetector.cs" Link="core\XppSyntaxDetector.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Drawing.Common" Version="8.0.0" />
   </ItemGroup>
 
 </Project>

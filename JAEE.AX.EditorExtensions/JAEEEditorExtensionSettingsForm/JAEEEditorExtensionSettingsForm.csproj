@@ -58,6 +58,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="HighlightWordProperties.cs" />
+    <Compile Include="SyntaxHighlighterProperties.cs" />
     <EmbeddedResource Include="AxEditorSettings.resx">
       <DependentUpon>AxEditorSettings.cs</DependentUpon>
     </EmbeddedResource>

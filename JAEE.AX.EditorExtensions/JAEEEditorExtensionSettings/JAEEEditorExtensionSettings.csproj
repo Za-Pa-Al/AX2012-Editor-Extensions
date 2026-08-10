@@ -52,6 +52,7 @@
     <Compile Include="JAEECurrentLineHighlightSettings.cs" />
     <Compile Include="JAEEHighlightWordSettings.cs" />
     <Compile Include="JAEEOutliningSettings.cs" />
+    <Compile Include="JAEESyntaxHighlighterSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RegistryHelper.cs" />
   </ItemGroup>

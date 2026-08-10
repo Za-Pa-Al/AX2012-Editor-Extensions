@@ -84,6 +84,11 @@ namespace JAEE.AX.EditorExtensions
                         continue;
                     }
 
+                    // A language keyword (if, return, new, is, as, ...) is never a type
+                    // name and must never start a type chain — otherwise e.g. "x as Foo;"
+                    // would match the declaration pattern with "as" as the type.
+                    if (IsLanguageKeyword(t.Value)) { i++; continue; }
+
                     int chainEnd = CollectChain(sig, i);
                     bool emitType = false;
 
@@ -91,8 +96,9 @@ namespace JAEE.AX.EditorExtensions
                     if (!emitType && chainEnd + 1 < sig.Count && sig[chainEnd + 1].Value == "::")
                         emitType = true;
 
-                    // Pattern: new <chain> → constructor
-                    if (!emitType && i > 0 && sig[i - 1].Value == "new")
+                    // Pattern: new <chain> → constructor;  is/as <chain> → type-check / cast
+                    if (!emitType && i > 0 &&
+                        (sig[i - 1].Value == "new" || sig[i - 1].Value == "is" || sig[i - 1].Value == "as"))
                         emitType = true;
 
                     // Pattern: <chain> [] → array type
@@ -183,7 +189,7 @@ namespace JAEE.AX.EditorExtensions
                 "firstFast", "forUpdate", "crossCompany", "validTimeState", "noFetch",
                 "void", "int", "int64", "str", "real", "boolean", "container",
                 "date", "utcdatetime", "guid", "anytype", "common",
-                "like", "in", "sum", "avg", "minof", "maxof", "count",
+                "like", "in", "is", "sum", "avg", "minof", "maxof", "count",
                 "next", "pause", "print", "window", "sleep", "halt", "retry",
                 "using", "namespace", "eventhandler", "server", "client",
                 "display", "edit", "at", "as"

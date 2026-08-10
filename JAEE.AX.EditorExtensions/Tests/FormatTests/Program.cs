@@ -205,6 +205,22 @@ namespace JAEE.AX.EditorExtensions.Format.Tests
                 "void f(){ if (a) { } }",
                 spans => !HasSpan(spans, "if", "void f(){ if (a) { } }", HighlightCategory.Method));
 
+            ClassifierCase("type after 'is'",
+                "void f(){ if (x is EcoResProduct) {} }",
+                spans => HasSpan(spans, "EcoResProduct", "void f(){ if (x is EcoResProduct) {} }", HighlightCategory.Type));
+
+            ClassifierCase("type after 'is' with chained receiver",
+                "void f(){ if (element.args().record() is EcoResProduct) {} }",
+                spans => HasSpan(spans, "EcoResProduct", "void f(){ if (element.args().record() is EcoResProduct) {} }", HighlightCategory.Type));
+
+            ClassifierCase("type after 'as'",
+                "void f(){ test2 = test as AccDistConstPayroll; }",
+                spans => HasSpan(spans, "AccDistConstPayroll", "void f(){ test2 = test as AccDistConstPayroll; }", HighlightCategory.Type));
+
+            ClassifierCase("'as' keyword itself not colored as type",
+                "void f(){ test2 = test as AccDistConstPayroll; }",
+                spans => !HasSpan(spans, "as", "void f(){ test2 = test as AccDistConstPayroll; }", HighlightCategory.Type));
+
             Console.WriteLine();
             Console.WriteLine(_failures == 0 ? "ALL TESTS PASSED" : $"{_failures} ASSERTION(S) FAILED");
             return _failures;

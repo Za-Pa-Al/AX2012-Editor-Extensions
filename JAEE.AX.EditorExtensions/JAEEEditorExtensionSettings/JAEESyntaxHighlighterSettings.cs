@@ -3,7 +3,7 @@ using System.Drawing;
 
 namespace JAEE.AX.EditorExtensions
 {
-    public enum HighlightCategory { Type, Macro, Method, MethodGlobal, Parameter, GlobalVar }
+    public enum HighlightCategory { Type, Macro, Method, MethodGlobal, Parameter, Local }
 
     /// <summary>
     /// Colors for the semantic syntax highlighter (types, macros, method calls).
@@ -26,9 +26,13 @@ namespace JAEE.AX.EditorExtensions
         public bool MethodGlobalEnabled { get; set; }
         public Color MethodGlobalColor { get; set; }
 
-        // Font-style categories (no color): parameters -> italic, non-local vars -> bold.
+        // Local + parameter variables render in a muted dark gray so non-local
+        // references (fields/globals) stand out by staying the default color.
         public bool ParameterEnabled { get; set; }
-        public bool GlobalVarEnabled { get; set; }
+        public Color ParameterColor { get; set; }
+        public bool LocalEnabled { get; set; }
+        public Color LocalColor { get; set; }
+        public bool GlobalVarEnabled { get; set; } // deprecated; kept for settings-file compatibility
 
         public JAEESyntaxHighlighterSettings()
         {
@@ -44,8 +48,11 @@ namespace JAEE.AX.EditorExtensions
             MethodGlobalEnabled = true;
             MethodGlobalColor = Color.FromArgb(0x1F, 0x6F, 0xC0); // blue (global functions)
 
-            ParameterEnabled = true;  // italic
-            GlobalVarEnabled = true;  // bold
+            ParameterEnabled = true;
+            ParameterColor = Color.FromArgb(0x66, 0x66, 0x66); // dark gray
+            LocalEnabled = true;
+            LocalColor = Color.FromArgb(0x66, 0x66, 0x66);     // dark gray
+            GlobalVarEnabled = false;
         }
     }
 }

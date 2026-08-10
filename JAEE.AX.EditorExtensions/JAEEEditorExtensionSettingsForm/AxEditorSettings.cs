@@ -61,7 +61,9 @@ namespace JAEE.AX.EditorExtensions
             singletonSettings.SyntaxHighlighter.MethodGlobalEnabled = propSyntaxHighlighter.MethodGlobalEnabled;
             singletonSettings.SyntaxHighlighter.MethodGlobalColor   = propSyntaxHighlighter.MethodGlobalColor;
             singletonSettings.SyntaxHighlighter.ParameterEnabled    = propSyntaxHighlighter.ParameterEnabled;
-            singletonSettings.SyntaxHighlighter.GlobalVarEnabled    = propSyntaxHighlighter.GlobalVarEnabled;
+            singletonSettings.SyntaxHighlighter.ParameterColor      = propSyntaxHighlighter.ParameterColor;
+            singletonSettings.SyntaxHighlighter.LocalEnabled        = propSyntaxHighlighter.LocalEnabled;
+            singletonSettings.SyntaxHighlighter.LocalColor          = propSyntaxHighlighter.LocalColor;
 
             singletonSettings.saveChanges();
         }

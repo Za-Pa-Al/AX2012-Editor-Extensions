@@ -13,7 +13,7 @@ namespace JAEE.AX.EditorExtensions
         internal const string Method       = "JAEE.Xpp.Method";
         internal const string MethodGlobal = "JAEE.Xpp.MethodGlobal";
         internal const string Parameter    = "JAEE.Xpp.Parameter";
-        internal const string GlobalVar    = "JAEE.Xpp.GlobalVar";
+        internal const string Local        = "JAEE.Xpp.Local";
     }
 
     /// <summary>
@@ -46,8 +46,8 @@ namespace JAEE.AX.EditorExtensions
         internal static ClassificationTypeDefinition ParameterDef;
 
         [Export(typeof(ClassificationTypeDefinition))]
-        [Name(XppClassificationNames.GlobalVar)]
-        internal static ClassificationTypeDefinition GlobalVarDef;
+        [Name(XppClassificationNames.Local)]
+        internal static ClassificationTypeDefinition LocalDef;
 #pragma warning restore 649
     }
 
@@ -109,7 +109,8 @@ namespace JAEE.AX.EditorExtensions
         }
     }
 
-    // Font-style only (no foreground) so the text keeps its default color.
+    // Parameters and locals get a muted dark-gray foreground so non-local
+    // references stay the default color and stand out.
     [Export(typeof(EditorFormatDefinition))]
     [ClassificationType(ClassificationTypeNames = XppClassificationNames.Parameter)]
     [Name("JAEE.Xpp.Parameter.Format")]
@@ -119,20 +120,24 @@ namespace JAEE.AX.EditorExtensions
         internal XppParameterFormat()
         {
             DisplayName = "X++ Parameter variable";
-            IsItalic = true;
+            var c = EditorSettings.getInstance().SyntaxHighlighter.ParameterColor;
+            if (c.A == 0) c = System.Drawing.Color.FromArgb(0x66, 0x66, 0x66); // unset -> default gray
+            ForegroundColor = Color.FromArgb(c.A, c.R, c.G, c.B);
         }
     }
 
     [Export(typeof(EditorFormatDefinition))]
-    [ClassificationType(ClassificationTypeNames = XppClassificationNames.GlobalVar)]
-    [Name("JAEE.Xpp.GlobalVar.Format")]
+    [ClassificationType(ClassificationTypeNames = XppClassificationNames.Local)]
+    [Name("JAEE.Xpp.Local.Format")]
     [UserVisible(true)]
-    internal sealed class XppGlobalVarFormat : ClassificationFormatDefinition
+    internal sealed class XppLocalFormat : ClassificationFormatDefinition
     {
-        internal XppGlobalVarFormat()
+        internal XppLocalFormat()
         {
-            DisplayName = "X++ Non-local variable";
-            IsBold = true;
+            DisplayName = "X++ Local variable";
+            var c = EditorSettings.getInstance().SyntaxHighlighter.LocalColor;
+            if (c.A == 0) c = System.Drawing.Color.FromArgb(0x66, 0x66, 0x66); // unset -> default gray
+            ForegroundColor = Color.FromArgb(c.A, c.R, c.G, c.B);
         }
     }
 }

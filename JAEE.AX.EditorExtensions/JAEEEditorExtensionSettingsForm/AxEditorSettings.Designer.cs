@@ -94,6 +94,9 @@
             // 
             this.propHighlightWord.Font = new System.Drawing.Font("Segoe UI", 9.25F);
             this.propHighlightWord.Location = new System.Drawing.Point(11, 40);
+            this.propHighlightWord.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                | System.Windows.Forms.AnchorStyles.Left)
+                | System.Windows.Forms.AnchorStyles.Right)));
             this.propHighlightWord.Name = "propHighlightWord";
             this.propHighlightWord.PropertySort = System.Windows.Forms.PropertySort.Alphabetical;
             this.propHighlightWord.Size = new System.Drawing.Size(296, 196);
@@ -102,6 +105,9 @@
             // 
             // tabControl1
             // 
+            this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                | System.Windows.Forms.AnchorStyles.Left)
+                | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl1.Controls.Add(this.tabPageHighlightWords);
             this.tabControl1.Controls.Add(this.tabPageHighlightLine);
             this.tabControl1.Controls.Add(this.tabPageOutlining);
@@ -203,6 +209,9 @@
             // 
             this.propHighlightLine.Font = new System.Drawing.Font("Segoe UI", 9.25F);
             this.propHighlightLine.Location = new System.Drawing.Point(13, 37);
+            this.propHighlightLine.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                | System.Windows.Forms.AnchorStyles.Left)
+                | System.Windows.Forms.AnchorStyles.Right)));
             this.propHighlightLine.Name = "propHighlightLine";
             this.propHighlightLine.PropertySort = System.Windows.Forms.PropertySort.Alphabetical;
             this.propHighlightLine.Size = new System.Drawing.Size(296, 196);
@@ -235,6 +244,9 @@
             //
             this.propSyntaxHighlighter.Font = new System.Drawing.Font("Segoe UI", 9.25F);
             this.propSyntaxHighlighter.Location = new System.Drawing.Point(13, 37);
+            this.propSyntaxHighlighter.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                | System.Windows.Forms.AnchorStyles.Left)
+                | System.Windows.Forms.AnchorStyles.Right)));
             this.propSyntaxHighlighter.Name = "propSyntaxHighlighter";
             this.propSyntaxHighlighter.PropertySort = System.Windows.Forms.PropertySort.Alphabetical;
             this.propSyntaxHighlighter.Size = new System.Drawing.Size(296, 196);
@@ -253,7 +265,8 @@
             this.Controls.Add(this.btnOK);
             this.Controls.Add(this.btnCancel);
             this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
+            this.MinimumSize = new System.Drawing.Size(366, 360);
             this.Name = "AxEditorSettings";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "AX 2012 Editor Extensions";

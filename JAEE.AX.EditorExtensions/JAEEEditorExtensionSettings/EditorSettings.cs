@@ -64,16 +64,6 @@ namespace JAEE.AX.EditorExtensions
                             fs.Close();
                             if (settings != null && settings.SyntaxHighlighter == null)
                                 settings.SyntaxHighlighter = new JAEESyntaxHighlighterSettings();
-                            else if (settings != null && settings.SyntaxHighlighter.MethodGlobalColor.A == 0)
-                            {
-                                // Settings file predates the MethodGlobal/Parameter/GlobalVar
-                                // categories (MethodGlobalColor deserializes fully-transparent).
-                                // Seed the new fields on.
-                                settings.SyntaxHighlighter.MethodGlobalEnabled = true;
-                                settings.SyntaxHighlighter.MethodGlobalColor = System.Drawing.Color.FromArgb(0x1F, 0x6F, 0xC0);
-                                settings.SyntaxHighlighter.ParameterEnabled = true;
-                                settings.SyntaxHighlighter.GlobalVarEnabled = true;
-                            }
                         }
                     }
                 }

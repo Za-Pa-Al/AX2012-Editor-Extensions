@@ -14,7 +14,9 @@ namespace JAEE.AX.EditorExtensions
         private bool   methodGlobalEnabled;
         private Color  methodGlobalColor;
         private bool   parameterEnabled;
-        private bool   globalVarEnabled;
+        private Color  parameterColor;
+        private bool   localEnabled;
+        private Color  localColor;
 
         [DisplayName("Type - Enabled"), Category("Types"), DefaultValue(true),
          Description("Color user-defined and system types (e.g. SalesTable, System.IO.Stream).")]
@@ -48,13 +50,21 @@ namespace JAEE.AX.EditorExtensions
          Description("Foreground color for global/free function calls.")]
         public Color MethodGlobalColor  { get { return methodGlobalColor; }   set { methodGlobalColor = value; } }
 
-        [DisplayName("Parameter - Italic"), Category("Variables"), DefaultValue(true),
-         Description("Render method parameter variables in italic (keeps default color).")]
+        [DisplayName("Parameter - Enabled"), Category("Variables"), DefaultValue(true),
+         Description("Color method parameter variables (muted, so non-local references stand out).")]
         public bool ParameterEnabled { get { return parameterEnabled; } set { parameterEnabled = value; } }
 
-        [DisplayName("Non-local variable - Bold"), Category("Variables"), DefaultValue(true),
-         Description("Render variables not declared in the current method (fields/globals) in bold. Heuristic; may bold enum values, table fields, and macro names.")]
-        public bool GlobalVarEnabled { get { return globalVarEnabled; } set { globalVarEnabled = value; } }
+        [DisplayName("Parameter - Color"), Category("Variables"),
+         Description("Foreground color for parameter variables.")]
+        public Color ParameterColor { get { return parameterColor; } set { parameterColor = value; } }
+
+        [DisplayName("Local - Enabled"), Category("Variables"), DefaultValue(true),
+         Description("Color local variables (muted, so non-local references stand out).")]
+        public bool LocalEnabled { get { return localEnabled; } set { localEnabled = value; } }
+
+        [DisplayName("Local - Color"), Category("Variables"),
+         Description("Foreground color for local variables. Non-local references (fields/globals) are left the default color.")]
+        public Color LocalColor { get { return localColor; } set { localColor = value; } }
 
         private SyntaxHighlighterProperties() { }
 
@@ -69,7 +79,9 @@ namespace JAEE.AX.EditorExtensions
             methodGlobalEnabled = settings.MethodGlobalEnabled;
             methodGlobalColor   = settings.MethodGlobalColor;
             parameterEnabled    = settings.ParameterEnabled;
-            globalVarEnabled    = settings.GlobalVarEnabled;
+            parameterColor      = settings.ParameterColor;
+            localEnabled        = settings.LocalEnabled;
+            localColor          = settings.LocalColor;
         }
     }
 }

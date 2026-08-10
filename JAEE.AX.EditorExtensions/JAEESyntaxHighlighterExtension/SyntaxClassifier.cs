@@ -52,7 +52,7 @@ namespace JAEE.AX.EditorExtensions
                 if (detected.Category == HighlightCategory.Method       && !settings.MethodEnabled)       continue;
                 if (detected.Category == HighlightCategory.MethodGlobal && !settings.MethodGlobalEnabled) continue;
                 if (detected.Category == HighlightCategory.Parameter    && !settings.ParameterEnabled)    continue;
-                if (detected.Category == HighlightCategory.GlobalVar    && !settings.GlobalVarEnabled)    continue;
+                if (detected.Category == HighlightCategory.Local        && !settings.LocalEnabled)        continue;
 
                 string typeName = CategoryToTypeName(detected.Category);
                 var classType = _registry.GetClassificationType(typeName);
@@ -74,7 +74,7 @@ namespace JAEE.AX.EditorExtensions
                 case HighlightCategory.Method:       return XppClassificationNames.Method;
                 case HighlightCategory.MethodGlobal: return XppClassificationNames.MethodGlobal;
                 case HighlightCategory.Parameter:    return XppClassificationNames.Parameter;
-                case HighlightCategory.GlobalVar:    return XppClassificationNames.GlobalVar;
+                case HighlightCategory.Local:        return XppClassificationNames.Local;
                 default: return string.Empty;
             }
         }

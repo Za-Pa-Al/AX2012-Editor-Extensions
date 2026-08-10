@@ -158,9 +158,9 @@ namespace JAEE.AX.EditorExtensions
 
             // ---- Pass 3: variables (scope-aware) ----
             // The buffer is a single method (or classDeclaration), so its whole scope is
-            // visible: the signature gives parameters, declarations give locals. Any other
-            // referenced identifier is non-local ("global"). Parameters -> italic, non-local
-            // -> bold, locals -> unstyled (no span emitted).
+            // visible: the signature gives parameters, declarations give locals. Parameters
+            // and locals render in a muted dark gray; any other referenced identifier is
+            // non-local (a field/global) and is left plain so it stands out.
             var paramNames = new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
             var localNames = new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
             CollectScope(sig, paramNames, localNames);
@@ -178,9 +178,8 @@ namespace JAEE.AX.EditorExtensions
                 if (paramNames.Contains(t.Value))
                     results.Add(new DetectedSpan(t.SourceStart, t.Value.Length, HighlightCategory.Parameter));
                 else if (localNames.Contains(t.Value))
-                    { /* local variable: leave unstyled */ }
-                else
-                    results.Add(new DetectedSpan(t.SourceStart, t.Value.Length, HighlightCategory.GlobalVar));
+                    results.Add(new DetectedSpan(t.SourceStart, t.Value.Length, HighlightCategory.Local));
+                // non-local (field/global): left plain, no span emitted
             }
 
             return results;

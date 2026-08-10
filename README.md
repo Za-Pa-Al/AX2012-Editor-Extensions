@@ -6,21 +6,22 @@ If you have any idea for improving this extensions, create new ones or you disco
 
 ## This fork
 
-Modernized to **.NET Framework 4.8** (builds under Build Tools — no VS2010 SDK, no admin) and adds two extensions:
+Modernized to **.NET Framework 4.8** (builds under Build Tools — no VS2010 SDK, no admin) and adds three extensions:
 
-- **Format** — `Ctrl+Shift+F`, X++ *Format Document* (whitespace-only, safety-verified). See [`JAEEFormatExtension/README.md`](JAEE.AX.EditorExtensions/JAEEFormatExtension/README.md).
+- **Format** — `Ctrl+Shift+F`, X++ *Format Document* (whitespace-only, safety-verified): aligns declaration/assignment columns, SQL-style `select` layout, and chops multi-line argument lists and boolean conditions (leading `&&`/`||` with an aligned compare column). See [`JAEEFormatExtension/README.md`](JAEE.AX.EditorExtensions/JAEEFormatExtension/README.md).
 - **Refactor Rename** — `Ctrl+R`, VS-style buffer-scoped whole-word rename.
+- **Syntax Highlighter** — semantic coloring of types, macros, instance/static method calls, global functions, and (muted) parameter/local variables. All colors and per-category toggles live in the *Syntax Colors* tab of the settings app.
 
 **Download the compiled extensions:** [Releases](../../releases/latest) — grab the zip, **close AX**, and copy the DLLs into `…\60\Client\Bin\EditorComponents\` (or run `Install-Local.bat`).
 
 ## Building &amp; releasing
 
 - **Build:** open `JAEE.AX.EditorExtensions/JAEE.AX.EditorExtensions.sln`. First place the six Microsoft VS editor DLLs in `References/` — see [`References/README.md`](References/README.md). (`JAEERefactorRenameExtension` isn't in the .sln; build that project on its own.)
-- **Version — one place for all assemblies:** [`JAEE.AX.EditorExtensions/SharedAssemblyInfo.cs`](JAEE.AX.EditorExtensions/SharedAssemblyInfo.cs) (currently **1.2.1.0**). To ship a new version, edit the two numbers there, rebuild, then tag/release. e.g. for 1.3.0:
+- **Version — one place for all assemblies:** [`JAEE.AX.EditorExtensions/SharedAssemblyInfo.cs`](JAEE.AX.EditorExtensions/SharedAssemblyInfo.cs) (currently **1.3.0.0**). To ship a new version, edit the two numbers there, rebuild, then tag/release. e.g. for 1.4.0:
 
   ```csharp
-  [assembly: AssemblyVersion("1.3.0.0")]
-  [assembly: AssemblyFileVersion("1.3.0.0")]
+  [assembly: AssemblyVersion("1.4.0.0")]
+  [assembly: AssemblyFileVersion("1.4.0.0")]
   ```
 - **Tests:** `dotnet run --project JAEE.AX.EditorExtensions/Tests/FormatTests`
 

@@ -167,6 +167,28 @@ namespace JAEE.AX.EditorExtensions.Format.Tests
                 "void f()\r\n{\r\nint x=1;\r\n}\r\n",
                 ("no lone LF", o => !System.Text.RegularExpressions.Regex.IsMatch(o, "(?<!\r)\n")));
 
+            // --- multiline boolean condition: chop + aligned compare column ---
+            Case("multiline if condition chops and aligns compare column",
+                "void f()\n{\n    if (alpha() != 0\n|| b() != 0)\n    {\n        x();\n    }\n}",
+                ("first operand stays on the if( line", o => o.Contains("if (alpha() != 0")),
+                ("|| leads the continuation, operand aligned, != aligned",
+                    o => o.Contains("    ||  b()     != 0)")));
+
+            Case("multiline condition — user's dotted-call example aligns",
+                "void f()\n{\n    if (purchLine.receivedInTotal() != 0\n|| purchLine.registered() != 0\n|| purchLine.invoicedInTotal() != 0)\n    {\n        x();\n    }\n}",
+                ("row 0 on if( line", o => o.Contains("if (purchLine.receivedInTotal() != 0")),
+                ("row 1 aligned under row 0's !=", o => o.Contains("    ||  purchLine.registered()      != 0")),
+                ("row 2 aligned, close paren attached", o => o.Contains("    ||  purchLine.invoicedInTotal() != 0)")));
+
+            Case("one-line condition stays on one line",
+                "void f()\n{\n    if (a() != 0 || b() != 0)\n    {\n        x();\n    }\n}",
+                ("not chopped", o => o.Contains("if (a() != 0 || b() != 0)")));
+
+            Case("multiline condition without compare op still chops (fallback)",
+                "void f()\n{\n    if (isA()\n|| isB())\n    {\n        x();\n    }\n}",
+                ("chopped, no column", o => o.Contains("if (isA()")),
+                ("|| continuation", o => o.Contains("    ||  isB())")));
+
             // ---- Classifier tests ----
 
             ClassifierCase("macro: directive token",

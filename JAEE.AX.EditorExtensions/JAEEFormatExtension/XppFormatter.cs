@@ -421,7 +421,12 @@ namespace JAEE.AX.EditorExtensions.Format
                     case "{": EmitOpenBrace(next, ref idx); return true;
                     case "}": EmitCloseBrace(next, ref idx); return true;
                     case ";": EmitSemicolon(next, ref idx); return true;
-                    case "(": EmitOpenParen(t, suppress); return true;
+                    case "(":
+                        if (!_inline && IsConjunctionGroup(idx, out int conjClose))
+                            EmitConjunctionGroup(t, idx, conjClose, suppress, ref idx);
+                        else
+                            EmitOpenParen(t, suppress);
+                        return true;
                     case ")": EmitCloseParen(next); return true;
                     case "[": EmitOpenBracket(t); return true;
                     case "]": EmitCloseBracket(); return true;
@@ -619,6 +624,116 @@ namespace JAEE.AX.EditorExtensions.Format
                 {
                     _hangNext = true;
                 }
+            }
+
+            // --- multiline boolean condition ("chop when multiline") ---
+            //
+            // A parenthesized boolean expression the author wrote across several source
+            // lines is chopped so each top-level && / || starts its own line, with the
+            // operands aligned under the first operand and (where every row is a simple
+            // lhs OP rhs) the compare operators aligned in a column — the same layout the
+            // SELECT 'where' clause uses. Only fires for a *pure* boolean paren: no
+            // top-level ',' or ';' (so argument lists and for-headers are untouched) and
+            // no comment inside (which would break the single-line-per-row assumption).
+            private bool IsConjunctionGroup(int openIdx, out int closeIdx)
+            {
+                closeIdx = -1;
+                int depth = 0, close = -1;
+                for (int j = openIdx; j < _t.Count; j++)
+                {
+                    if (_t[j].Type != TokenType.Punctuation) continue;
+                    string pv = _t[j].Value;
+                    if (pv == "(" || pv == "[") depth++;
+                    else if (pv == ")" || pv == "]") { depth--; if (depth == 0) { close = j; break; } }
+                }
+                if (close < 0) return false;
+
+                bool multiline = _t[close].NewlinesBefore >= 1;
+                bool hasConj = false;
+                int d = 0;
+                for (int j = openIdx + 1; j < close; j++)
+                {
+                    if (_t[j].NewlinesBefore >= 1) multiline = true;
+                    if (_t[j].Type == TokenType.Comment) return false;
+                    string v = _t[j].Value;
+                    if (_t[j].Type == TokenType.Punctuation && (v == "(" || v == "[")) { d++; continue; }
+                    if (_t[j].Type == TokenType.Punctuation && (v == ")" || v == "]")) { d--; continue; }
+                    if (d != 0) continue;
+                    if (v == "," || v == ";") return false;                 // arg list / for-header
+                    if (_t[j].Type == TokenType.Operator && (v == "&&" || v == "||")) hasConj = true;
+                }
+                if (!multiline || !hasConj) return false;
+                closeIdx = close;
+                return true;
+            }
+
+            private void EmitConjunctionGroup(Token open, int openIdx, int closeIdx, bool suppress, ref int idx)
+            {
+                // '(' with the same spacing rules as EmitOpenParen
+                bool control = _prev != null && _prev.Type == TokenType.Word && IsControlKeyword(_prev.Value);
+                bool spaceKeyword = control || (_prev != null && _prev.Type == TokenType.Word &&
+                                                SpaceBeforeParenKeywords.Contains(_prev.Value));
+                if (spaceKeyword && !_lineStart && !suppress)
+                {
+                    if (!EndsWith(' ')) _sb.Append(' ');
+                    _sb.Append('(');
+                }
+                else
+                {
+                    Attach("(");
+                }
+                _lineStart = false;
+
+                int contentCol = CurrentColumn();          // operands align here (just after '(')
+                int baseIndent = Tab * IndentLevel();       // the statement's own indent
+                if (baseIndent > contentCol) baseIndent = Math.Max(0, contentCol - 1);
+
+                var conjs = new List<string>();
+                var conds = SplitTopLevel(_t, openIdx + 1, closeIdx, ConjSep, conjs);
+
+                var left = new List<string>();
+                var ops = new List<string>();
+                var right = new List<string>();
+                foreach (var r in conds)
+                {
+                    int oi = FindCompareOp(r[0], r[1]);
+                    if (oi < 0) { left.Add(Inline(_t, r[0], r[1])); ops.Add(""); right.Add(""); }
+                    else { left.Add(Inline(_t, r[0], oi)); ops.Add(_t[oi].Value); right.Add(Inline(_t, oi + 1, r[1])); }
+                }
+                int maxLeft = 0;
+                for (int k = 0; k < conds.Count; k++)
+                    if (ops[k].Length > 0) maxLeft = Math.Max(maxLeft, left[k].Length);
+
+                for (int k = 0; k < conds.Count; k++)
+                {
+                    string cond = ops[k].Length > 0
+                        ? left[k].PadRight(maxLeft) + " " + ops[k] + " " + right[k]
+                        : left[k];
+                    if (k == 0)
+                    {
+                        _sb.Append(cond);
+                    }
+                    else
+                    {
+                        _sb.Append('\n');
+                        string conj = conjs[k];
+                        int pad = contentCol - baseIndent - conj.Length;
+                        if (pad < 1) pad = 1;
+                        _sb.Append(new string(' ', baseIndent));
+                        _sb.Append(conj);
+                        _sb.Append(new string(' ', pad));
+                        _sb.Append(cond);
+                    }
+                }
+                _lineStart = false;
+
+                Attach(")");
+
+                Token afterClose = closeIdx + 1 < _t.Count ? _t[closeIdx + 1] : null;
+                if (control && afterClose != null && afterClose.Value != "{" && afterClose.Value != ";")
+                    _hangNext = true;
+
+                idx = closeIdx; // main loop's idx++ lands past ')'
             }
 
             // --- colons ---

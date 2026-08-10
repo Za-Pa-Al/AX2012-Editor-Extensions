@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using System.Runtime.Serialization;
 
 namespace JAEE.AX.EditorExtensions
 {
@@ -35,6 +36,20 @@ namespace JAEE.AX.EditorExtensions
         public bool GlobalVarEnabled { get; set; } // deprecated; kept for settings-file compatibility
 
         public JAEESyntaxHighlighterSettings()
+        {
+            SetDefaults();
+        }
+
+        // Runs before the formatter populates fields from a settings file. Any field
+        // missing from an older file keeps the default set here; fields present in the
+        // file overwrite it afterwards. This is why no version-migration code is needed.
+        [OnDeserializing]
+        private void OnDeserializing(StreamingContext context)
+        {
+            SetDefaults();
+        }
+
+        private void SetDefaults()
         {
             TypeEnabled = true;
             TypeColor = Color.FromArgb(0x1E, 0x82, 0x69);   // green (VS-style user type)

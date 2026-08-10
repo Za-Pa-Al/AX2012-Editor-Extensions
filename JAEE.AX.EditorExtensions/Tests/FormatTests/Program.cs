@@ -189,13 +189,26 @@ namespace JAEE.AX.EditorExtensions.Format.Tests
                 "void f(){ System.IO.MemoryStream ms = new System.IO.MemoryStream(); }",
                 spans => HasSpan(spans, "System.IO.MemoryStream", "void f(){ System.IO.MemoryStream ms = new System.IO.MemoryStream(); }", HighlightCategory.Type));
 
-            ClassifierCase("method call colored",
+            ClassifierCase("global function colored as MethodGlobal",
                 "void f(){ info(\"hello\"); }",
-                spans => HasSpan(spans, "info", "void f(){ info(\"hello\"); }", HighlightCategory.Method));
+                spans => HasSpan(spans, "info", "void f(){ info(\"hello\"); }", HighlightCategory.MethodGlobal));
 
-            ClassifierCase("chained method colored (identifier only)",
+            ClassifierCase("global function is not the instance Method category",
+                "void f(){ info(\"hello\"); }",
+                spans => !HasSpan(spans, "info", "void f(){ info(\"hello\"); }", HighlightCategory.Method));
+
+            ClassifierCase("instance method colored as Method (not global)",
                 "void f(){ _bitmap.MakeTransparent(); }",
                 spans => HasSpan(spans, "MakeTransparent", "void f(){ _bitmap.MakeTransparent(); }", HighlightCategory.Method));
+
+            ClassifierCase("static :: method colored as Method (not global)",
+                "void f(){ x = File::GetFileFromUser(); }",
+                spans => HasSpan(spans, "GetFileFromUser", "void f(){ x = File::GetFileFromUser(); }", HighlightCategory.Method));
+
+            ClassifierCase("nested global call inside args stays global",
+                "void f(){ info(strFmt(\"%1\", conPeek(record, 1))); }",
+                spans => HasSpan(spans, "strFmt", "void f(){ info(strFmt(\"%1\", conPeek(record, 1))); }", HighlightCategory.MethodGlobal)
+                      && HasSpan(spans, "conPeek", "void f(){ info(strFmt(\"%1\", conPeek(record, 1))); }", HighlightCategory.MethodGlobal));
 
             ClassifierCase("new MemoryStream stays Type, not also Method",
                 "void f(){ System.IO.MemoryStream ms = new System.IO.MemoryStream(); }",

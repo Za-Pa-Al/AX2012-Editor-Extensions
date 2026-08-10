@@ -11,6 +11,8 @@ namespace JAEE.AX.EditorExtensions
         private Color  macroColor;
         private bool   methodEnabled;
         private Color  methodColor;
+        private bool   methodGlobalEnabled;
+        private Color  methodGlobalColor;
 
         [DisplayName("Type - Enabled"), Category("Types"), DefaultValue(true),
          Description("Color user-defined and system types (e.g. SalesTable, System.IO.Stream).")]
@@ -29,23 +31,33 @@ namespace JAEE.AX.EditorExtensions
         public Color MacroColor   { get { return macroColor; }    set { macroColor = value; } }
 
         [DisplayName("Method - Enabled"), Category("Methods"), DefaultValue(true),
-         Description("Color method call identifiers (e.g. info, MakeTransparent).")]
+         Description("Color instance/static method calls (x.foo(), Type::foo()).")]
         public bool MethodEnabled { get { return methodEnabled; } set { methodEnabled = value; } }
 
         [DisplayName("Method - Color"), Category("Methods"),
-         Description("Foreground color for X++ method calls.")]
+         Description("Foreground color for instance/static method calls.")]
         public Color MethodColor  { get { return methodColor; }   set { methodColor = value; } }
+
+        [DisplayName("Global function - Enabled"), Category("Methods"), DefaultValue(true),
+         Description("Color global/free function calls (info(), strFmt(), error()).")]
+        public bool MethodGlobalEnabled { get { return methodGlobalEnabled; } set { methodGlobalEnabled = value; } }
+
+        [DisplayName("Global function - Color"), Category("Methods"),
+         Description("Foreground color for global/free function calls.")]
+        public Color MethodGlobalColor  { get { return methodGlobalColor; }   set { methodGlobalColor = value; } }
 
         private SyntaxHighlighterProperties() { }
 
         public SyntaxHighlighterProperties(JAEESyntaxHighlighterSettings settings)
         {
-            typeEnabled   = settings.TypeEnabled;
-            typeColor     = settings.TypeColor;
-            macroEnabled  = settings.MacroEnabled;
-            macroColor    = settings.MacroColor;
-            methodEnabled = settings.MethodEnabled;
-            methodColor   = settings.MethodColor;
+            typeEnabled         = settings.TypeEnabled;
+            typeColor           = settings.TypeColor;
+            macroEnabled        = settings.MacroEnabled;
+            macroColor          = settings.MacroColor;
+            methodEnabled       = settings.MethodEnabled;
+            methodColor         = settings.MethodColor;
+            methodGlobalEnabled = settings.MethodGlobalEnabled;
+            methodGlobalColor   = settings.MethodGlobalColor;
         }
     }
 }

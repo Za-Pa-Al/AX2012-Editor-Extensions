@@ -8,9 +8,10 @@ namespace JAEE.AX.EditorExtensions
     /// <summary>Unique classification-type names for the X++ semantic highlighter.</summary>
     internal static class XppClassificationNames
     {
-        internal const string Type   = "JAEE.Xpp.Type";
-        internal const string Macro  = "JAEE.Xpp.Macro";
-        internal const string Method = "JAEE.Xpp.Method";
+        internal const string Type         = "JAEE.Xpp.Type";
+        internal const string Macro        = "JAEE.Xpp.Macro";
+        internal const string Method       = "JAEE.Xpp.Method";
+        internal const string MethodGlobal = "JAEE.Xpp.MethodGlobal";
     }
 
     /// <summary>
@@ -33,6 +34,10 @@ namespace JAEE.AX.EditorExtensions
         [Export(typeof(ClassificationTypeDefinition))]
         [Name(XppClassificationNames.Method)]
         internal static ClassificationTypeDefinition MethodDef;
+
+        [Export(typeof(ClassificationTypeDefinition))]
+        [Name(XppClassificationNames.MethodGlobal)]
+        internal static ClassificationTypeDefinition MethodGlobalDef;
 #pragma warning restore 649
     }
 
@@ -74,8 +79,22 @@ namespace JAEE.AX.EditorExtensions
     {
         internal XppMethodFormat()
         {
-            DisplayName = "X++ Method";
+            DisplayName = "X++ Method (instance/static)";
             var c = EditorSettings.getInstance().SyntaxHighlighter.MethodColor;
+            ForegroundColor = Color.FromArgb(c.A, c.R, c.G, c.B);
+        }
+    }
+
+    [Export(typeof(EditorFormatDefinition))]
+    [ClassificationType(ClassificationTypeNames = XppClassificationNames.MethodGlobal)]
+    [Name("JAEE.Xpp.MethodGlobal.Format")]
+    [UserVisible(true)]
+    internal sealed class XppMethodGlobalFormat : ClassificationFormatDefinition
+    {
+        internal XppMethodGlobalFormat()
+        {
+            DisplayName = "X++ Method (global function)";
+            var c = EditorSettings.getInstance().SyntaxHighlighter.MethodGlobalColor;
             ForegroundColor = Color.FromArgb(c.A, c.R, c.G, c.B);
         }
     }

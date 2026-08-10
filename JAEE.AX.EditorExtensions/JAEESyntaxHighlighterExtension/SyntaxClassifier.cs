@@ -27,9 +27,10 @@ namespace JAEE.AX.EditorExtensions
 
             foreach (var detected in XppSyntaxDetector.Classify(text))
             {
-                if (detected.Category == HighlightCategory.Type   && !settings.TypeEnabled)   continue;
-                if (detected.Category == HighlightCategory.Macro  && !settings.MacroEnabled)  continue;
-                if (detected.Category == HighlightCategory.Method && !settings.MethodEnabled) continue;
+                if (detected.Category == HighlightCategory.Type         && !settings.TypeEnabled)         continue;
+                if (detected.Category == HighlightCategory.Macro        && !settings.MacroEnabled)        continue;
+                if (detected.Category == HighlightCategory.Method       && !settings.MethodEnabled)       continue;
+                if (detected.Category == HighlightCategory.MethodGlobal && !settings.MethodGlobalEnabled) continue;
 
                 string typeName = CategoryToTypeName(detected.Category);
                 var classType = _registry.GetClassificationType(typeName);
@@ -46,9 +47,10 @@ namespace JAEE.AX.EditorExtensions
         {
             switch (cat)
             {
-                case HighlightCategory.Type:   return XppClassificationNames.Type;
-                case HighlightCategory.Macro:  return XppClassificationNames.Macro;
-                case HighlightCategory.Method: return XppClassificationNames.Method;
+                case HighlightCategory.Type:         return XppClassificationNames.Type;
+                case HighlightCategory.Macro:        return XppClassificationNames.Macro;
+                case HighlightCategory.Method:       return XppClassificationNames.Method;
+                case HighlightCategory.MethodGlobal: return XppClassificationNames.MethodGlobal;
                 default: return string.Empty;
             }
         }

@@ -139,6 +139,9 @@ namespace JAEE.AX.EditorExtensions
             }
 
             // ---- Pass 2: Method ----
+            // A Word directly followed by '(' is a call. Preceded by '.' or '::' it is an
+            // instance/static member call (Method); otherwise it is a free/global function
+            // call (MethodGlobal), e.g. info(), strFmt().
             for (int j = 0; j < sig.Count; j++)
             {
                 if (covered.Contains(j)) continue;
@@ -146,7 +149,11 @@ namespace JAEE.AX.EditorExtensions
                 if (t.Type != TokenType.Word) continue;
                 if (IsLanguageKeyword(t.Value)) continue;
                 if (j + 1 < sig.Count && sig[j + 1].Value == "(")
-                    results.Add(new DetectedSpan(t.SourceStart, t.Value.Length, HighlightCategory.Method));
+                {
+                    bool isMember = j > 0 && (sig[j - 1].Value == "." || sig[j - 1].Value == "::");
+                    var cat = isMember ? HighlightCategory.Method : HighlightCategory.MethodGlobal;
+                    results.Add(new DetectedSpan(t.SourceStart, t.Value.Length, cat));
+                }
             }
 
             return results;

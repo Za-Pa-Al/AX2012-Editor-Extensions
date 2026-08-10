@@ -184,10 +184,21 @@ namespace JAEE.AX.EditorExtensions.Format.Tests
                 "void f()\n{\n    if (a() != 0 || b() != 0)\n    {\n        x();\n    }\n}",
                 ("not chopped", o => o.Contains("if (a() != 0 || b() != 0)")));
 
-            Case("multiline condition without compare op still chops (fallback)",
+            Case("multiline condition without compare op chops with plain single space",
                 "void f()\n{\n    if (isA()\n|| isB())\n    {\n        x();\n    }\n}",
                 ("chopped, no column", o => o.Contains("if (isA()")),
-                ("|| continuation", o => o.Contains("    ||  isB())")));
+                ("|| continuation single space", o => o.Contains("    || isB())")));
+
+            Case("one-line condition keeps a space between && and a nested paren",
+                "void f()\n{\n    if (a == 1 && (b == 2 || c == 3))\n    {\n        x();\n    }\n}",
+                ("&& ( spaced", o => o.Contains("a == 1 && (b == 2 || c == 3)")),
+                ("never glued &&(", o => !o.Contains("&&(")));
+
+            Case("multiline mixed condition (compare row + paren group) plain-chops",
+                "void f()\n{\n    if (a == 1\n&& (b == 2 || c == 3))\n    {\n        x();\n    }\n}",
+                ("row 0 on if( line", o => o.Contains("if (a == 1")),
+                ("&& leads with a single space, no stray padding",
+                    o => o.Contains("    && (b == 2 || c == 3))")));
 
             // ---- Classifier tests ----
 

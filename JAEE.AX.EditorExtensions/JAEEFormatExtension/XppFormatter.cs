@@ -592,19 +592,25 @@ namespace JAEE.AX.EditorExtensions.Format
             {
                 bool control = _prev != null && _prev.Type == TokenType.Word &&
                                IsControlKeyword(_prev.Value);
-                // Keywords that take a parenthesized expression want a space before '(' —
-                // control keywords plus return/throw. A plain identifier before '(' is a
-                // call and gets no space.
-                bool spaceKeyword = control || (_prev != null && _prev.Type == TokenType.Word &&
-                                                SpaceBeforeParenKeywords.Contains(_prev.Value));
-                if (spaceKeyword && !_lineStart && !suppress)
+                // '(' is TIGHT (a call or a grouping glued to what precedes it) after a
+                // value, a grouping/member token, or a unary; it takes a LEADING SPACE
+                // after a binary operator, '=', or a keyword like if/return/throw. The old
+                // code Attach()ed in the non-keyword case, which trimmed the space a binary
+                // operator had just emitted -> "a &&(b)".
+                bool tight =
+                    suppress || _lineStart || _prev == null ||
+                    _prev.Value == "(" || _prev.Value == "[" || _prev.Value == "." || _prev.Value == "::" ||
+                    _prev.Type == TokenType.Number || _prev.Value == ")" || _prev.Value == "]" ||
+                    (_prev.Type == TokenType.Word && !control && !SpaceBeforeParenKeywords.Contains(_prev.Value));
+
+                if (tight)
                 {
-                    if (!EndsWith(' ')) _sb.Append(' ');
-                    _sb.Append('(');
+                    Attach("(");
                 }
                 else
                 {
-                    Attach("(");
+                    if (!_lineStart && !EndsWith(' ')) _sb.Append(' ');
+                    _sb.Append('(');
                 }
                 _lineStart = false;
                 _paren++;
@@ -700,14 +706,23 @@ namespace JAEE.AX.EditorExtensions.Format
                     if (oi < 0) { left.Add(Inline(_t, r[0], r[1])); ops.Add(""); right.Add(""); }
                     else { left.Add(Inline(_t, r[0], oi)); ops.Add(_t[oi].Value); right.Add(Inline(_t, oi + 1, r[1])); }
                 }
-                int maxLeft = 0;
+                // Only build the aligned "table" (operands aligned under the first, compare
+                // operators in a column) when EVERY row is a simple lhs OP rhs. If any row is
+                // a parenthesized group or otherwise has no top-level compare op, mixing the
+                // two looks like stray padding — fall back to a plain single-space chop.
+                bool allSimple = conds.Count > 0;
                 for (int k = 0; k < conds.Count; k++)
-                    if (ops[k].Length > 0) maxLeft = Math.Max(maxLeft, left[k].Length);
+                    if (ops[k].Length == 0) { allSimple = false; break; }
+
+                int maxLeft = 0;
+                if (allSimple)
+                    for (int k = 0; k < conds.Count; k++)
+                        maxLeft = Math.Max(maxLeft, left[k].Length);
 
                 for (int k = 0; k < conds.Count; k++)
                 {
                     string cond = ops[k].Length > 0
-                        ? left[k].PadRight(maxLeft) + " " + ops[k] + " " + right[k]
+                        ? (allSimple ? left[k].PadRight(maxLeft) : left[k]) + " " + ops[k] + " " + right[k]
                         : left[k];
                     if (k == 0)
                     {
@@ -717,11 +732,18 @@ namespace JAEE.AX.EditorExtensions.Format
                     {
                         _sb.Append('\n');
                         string conj = conjs[k];
-                        int pad = contentCol - baseIndent - conj.Length;
-                        if (pad < 1) pad = 1;
                         _sb.Append(new string(' ', baseIndent));
                         _sb.Append(conj);
-                        _sb.Append(new string(' ', pad));
+                        if (allSimple)
+                        {
+                            int pad = contentCol - baseIndent - conj.Length;
+                            if (pad < 1) pad = 1;
+                            _sb.Append(new string(' ', pad));
+                        }
+                        else
+                        {
+                            _sb.Append(' ');
+                        }
                         _sb.Append(cond);
                     }
                 }

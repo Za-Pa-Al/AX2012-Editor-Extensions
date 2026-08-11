@@ -706,42 +706,67 @@ namespace JAEE.AX.EditorExtensions.Format
                     if (oi < 0) { left.Add(Inline(_t, r[0], r[1])); ops.Add(""); right.Add(""); }
                     else { left.Add(Inline(_t, r[0], oi)); ops.Add(_t[oi].Value); right.Add(Inline(_t, oi + 1, r[1])); }
                 }
-                // Only build the aligned "table" (operands aligned under the first, compare
-                // operators in a column) when EVERY row is a simple lhs OP rhs. If any row is
-                // a parenthesized group or otherwise has no top-level compare op, mixing the
-                // two looks like stray padding — fall back to a plain single-space chop.
-                bool allSimple = conds.Count > 0;
-                for (int k = 0; k < conds.Count; k++)
-                    if (ops[k].Length == 0) { allSimple = false; break; }
+                // Align the group into a table: the conjunction operators sit in a column
+                // under the '(' content, the operands hang one space past the operator, and
+                // the compare operators (of the rows that have one) line up in their own
+                // column. A bare boolean row (no compare op) just sits at the operand column.
+                // The one shape that breaks the table is a row that is itself a single
+                // parenthesized sub-group, e.g. (b == 2 || c == 3): its inner comparisons
+                // would fight the compare column, so any such row forces a plain chop.
+                bool useTable = conds.Count > 0;
+                for (int k = 0; k < conds.Count && useTable; k++)
+                {
+                    int a = conds[k][0], b = conds[k][1];
+                    if (b - a >= 2 && _t[a].Type == TokenType.Punctuation && _t[a].Value == "(")
+                    {
+                        int d2 = 0, matchEnd = -1;
+                        for (int j = a; j < b; j++)
+                        {
+                            if (_t[j].Type != TokenType.Punctuation) continue;
+                            string pv = _t[j].Value;
+                            if (pv == "(" || pv == "[") d2++;
+                            else if (pv == ")" || pv == "]") { d2--; if (d2 == 0) { matchEnd = j; break; } }
+                        }
+                        if (matchEnd == b - 1) useTable = false;   // whole row is one paren group
+                    }
+                }
 
-                int maxLeft = 0;
-                if (allSimple)
+                int opWidth = 0;                                    // widest conjunction ("&&"/"||" => 2)
+                for (int k = 1; k < conjs.Count; k++)
+                    if (conjs[k].Length > opWidth) opWidth = conjs[k].Length;
+
+                int maxLeft = 0;                                    // compare column, over rows that compare
+                if (useTable)
                     for (int k = 0; k < conds.Count; k++)
-                        maxLeft = Math.Max(maxLeft, left[k].Length);
+                        if (ops[k].Length > 0 && left[k].Length > maxLeft) maxLeft = left[k].Length;
 
                 for (int k = 0; k < conds.Count; k++)
                 {
                     string cond = ops[k].Length > 0
-                        ? (allSimple ? left[k].PadRight(maxLeft) : left[k]) + " " + ops[k] + " " + right[k]
+                        ? (useTable ? left[k].PadRight(maxLeft) : left[k]) + " " + ops[k] + " " + right[k]
                         : left[k];
                     if (k == 0)
                     {
+                        if (useTable) _sb.Append(new string(' ', opWidth + 1)); // lead-in so the
+                                                                               // first operand aligns
                         _sb.Append(cond);
                     }
                     else
                     {
                         _sb.Append('\n');
                         string conj = conjs[k];
-                        _sb.Append(new string(' ', baseIndent));
-                        _sb.Append(conj);
-                        if (allSimple)
+                        if (useTable)
                         {
-                            int pad = contentCol - baseIndent - conj.Length;
+                            _sb.Append(new string(' ', contentCol));           // operator under '('
+                            _sb.Append(conj);
+                            int pad = opWidth + 1 - conj.Length;
                             if (pad < 1) pad = 1;
                             _sb.Append(new string(' ', pad));
                         }
                         else
                         {
+                            _sb.Append(new string(' ', baseIndent));           // plain chop at indent
+                            _sb.Append(conj);
                             _sb.Append(' ');
                         }
                         _sb.Append(cond);

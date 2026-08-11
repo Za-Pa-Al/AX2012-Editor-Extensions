@@ -170,24 +170,33 @@ namespace JAEE.AX.EditorExtensions.Format.Tests
             // --- multiline boolean condition: chop + aligned compare column ---
             Case("multiline if condition chops and aligns compare column",
                 "void f()\n{\n    if (alpha() != 0\n|| b() != 0)\n    {\n        x();\n    }\n}",
-                ("first operand stays on the if( line", o => o.Contains("if (alpha() != 0")),
-                ("|| leads the continuation, operand aligned, != aligned",
-                    o => o.Contains("    ||  b()     != 0)")));
+                ("first operand gets lead-in so it aligns", o => o.Contains("if (   alpha() != 0")),
+                ("|| sits under '(', operand aligned, != aligned",
+                    o => o.Contains("        || b()     != 0)")));
 
             Case("multiline condition — user's dotted-call example aligns",
                 "void f()\n{\n    if (purchLine.receivedInTotal() != 0\n|| purchLine.registered() != 0\n|| purchLine.invoicedInTotal() != 0)\n    {\n        x();\n    }\n}",
-                ("row 0 on if( line", o => o.Contains("if (purchLine.receivedInTotal() != 0")),
-                ("row 1 aligned under row 0's !=", o => o.Contains("    ||  purchLine.registered()      != 0")),
-                ("row 2 aligned, close paren attached", o => o.Contains("    ||  purchLine.invoicedInTotal() != 0)")));
+                ("row 0 on if( line with lead-in", o => o.Contains("if (   purchLine.receivedInTotal() != 0")),
+                ("row 1 aligned under row 0's !=", o => o.Contains("        || purchLine.registered()      != 0")),
+                ("row 2 aligned, close paren attached", o => o.Contains("        || purchLine.invoicedInTotal() != 0)")));
+
+            // A bare boolean first row + simple compares: still a full table (operator under
+            // '(', operands aligned, compare column aligned over the rows that compare).
+            Case("multiline condition mixes a bare boolean row with compares and still aligns",
+                "void f()\n{\n    if (PurchTable.Active\n&& PurchTable.Delivery == DeliveryEnum::Decentral\n&& PurchTable.Status == PurchStatus::Distributed)\n    {\n        x();\n    }\n}",
+                ("bare row gets lead-in", o => o.Contains("if (   PurchTable.Active")),
+                ("&& under '(' for the compare rows", o => o.Contains("        && PurchTable.Delivery ==")),
+                ("compare column aligned across the two compare rows",
+                    o => o.Contains("        && PurchTable.Status   == PurchStatus::Distributed)")));
 
             Case("one-line condition stays on one line",
                 "void f()\n{\n    if (a() != 0 || b() != 0)\n    {\n        x();\n    }\n}",
                 ("not chopped", o => o.Contains("if (a() != 0 || b() != 0)")));
 
-            Case("multiline condition without compare op chops with plain single space",
+            Case("multiline condition without any compare op still aligns operands",
                 "void f()\n{\n    if (isA()\n|| isB())\n    {\n        x();\n    }\n}",
-                ("chopped, no column", o => o.Contains("if (isA()")),
-                ("|| continuation single space", o => o.Contains("    || isB())")));
+                ("first operand gets lead-in", o => o.Contains("if (   isA()")),
+                ("|| under '(', operand aligned", o => o.Contains("        || isB())")));
 
             Case("one-line condition keeps a space between && and a nested paren",
                 "void f()\n{\n    if (a == 1 && (b == 2 || c == 3))\n    {\n        x();\n    }\n}",

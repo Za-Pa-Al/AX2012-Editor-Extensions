@@ -34,7 +34,7 @@ Or run [`Install-Local.bat`](src/Install-Local.bat), which copies every extensio
 ## Build &amp; release
 
 - **Build:** open `src/JAEE.AX.EditorExtensions.sln`. First place the six Microsoft VS editor DLLs in `References/` — see [`References/README.md`](References/README.md). (`JAEERefactorRenameExtension` isn't in the .sln; build that project on its own.)
-- **Version — one place for all assemblies:** [`SharedAssemblyInfo.cs`](src/SharedAssemblyInfo.cs) (currently **1.3.1.0**). To ship a new version, edit the two numbers there, rebuild, then tag and release. e.g. for 1.4.0:
+- **Version — one place for all assemblies:** [`SharedAssemblyInfo.cs`](src/SharedAssemblyInfo.cs) (currently **1.3.2.0**). To ship a new version, edit the two numbers there, rebuild, then tag and release. e.g. for 1.4.0:
 
   ```csharp
   [assembly: AssemblyVersion("1.4.0.0")]
